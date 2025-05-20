@@ -29,7 +29,11 @@ export const SessionCard = ({
   plays, 
   showBookmark 
 }: SessionCardProps) => (
-  <View style={[styles.sessionCard, large && styles.sessionCardLarge, compact && styles.sessionCardCompact]}>
+  <TouchableOpacity 
+    style={[styles.sessionCard, large && styles.sessionCardLarge, compact && styles.sessionCardCompact]}
+    onPress={onButtonPress}
+    activeOpacity={0.7}
+  >
     <View style={[styles.sessionCardContent, compact && styles.sessionCardContentCompact]}>
       <View style={[styles.sessionCardIcon, compact && styles.sessionCardIconCompact]}>
         <Text style={{fontSize: large ? 28 : compact ? 20 : 22, color: '#fff', opacity: 0.8}}>▶</Text>
@@ -41,11 +45,6 @@ export const SessionCard = ({
         {plays && <Text style={styles.sessionCardSubtitle}>{plays}</Text>}
       </View>
       {duration && !compact && <Text style={styles.sessionCardDuration}>{duration}</Text>}
-      {buttonLabel && !large && !compact && (
-        <TouchableOpacity style={styles.sessionCardButton} onPress={onButtonPress}>
-          <Text style={styles.sessionCardButtonText}>{buttonLabel}</Text>
-        </TouchableOpacity>
-      )}
     </View>
     {progress !== undefined && !compact && (
       <View style={styles.progressBar}><View style={[styles.progressFill, { width: `${progress * 100}%` }]} /></View>
@@ -55,7 +54,7 @@ export const SessionCard = ({
         <GradientButton title={buttonLabel || ''} onPress={onButtonPress} />
       </View>
     )}
-  </View>
+  </TouchableOpacity>
 );
 
 const styles = StyleSheet.create({

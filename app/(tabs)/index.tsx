@@ -2,6 +2,7 @@ import { Background } from '@/components/ui/Background';
 import { CollectionCard } from '@/components/ui/CollectionCard';
 import { SessionCard } from '@/components/ui/SessionCard';
 import { TabSelector } from '@/components/ui/TabSelector';
+import { useRouter } from 'expo-router';
 import { Lightning, Moon, Trophy, WaveSawtooth } from 'phosphor-react-native';
 import React, { useState } from 'react';
 import { Dimensions, FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -42,7 +43,20 @@ const popularSessions = {
 };
 
 export default function HomeScreen() {
+  const router = useRouter();
   const [selectedTab, setSelectedTab] = useState<keyof typeof popularSessions>('all');
+
+  const handleSessionPress = (title: string, duration: string, description?: string) => {
+    router.push({
+      pathname: '/play',
+      params: {
+        title,
+        duration,
+        description,
+        audioUrl: 'https://example.com/audio.mp3' // Replace with actual audio URL
+      }
+    });
+  };
 
   // ListHeaderComponent for FlatList
   const renderHeader = () => (
@@ -61,6 +75,7 @@ export default function HomeScreen() {
         title="Pre-Competition Focus"
         subtitle="12 min · 3 days ago"
         progress={0.75}
+        onButtonPress={() => handleSessionPress('Pre-Competition Focus', '12 min')}
       />
 
       {/* Today's Pick */}
@@ -71,6 +86,11 @@ export default function HomeScreen() {
         buttonLabel="Start Session"
         duration="15 min"
         large
+        onButtonPress={() => handleSessionPress(
+          'Mental Edge Visualization',
+          '15 min',
+          'Visualize your perfect performance and build confidence'
+        )}
       />
 
       {/* Collections */}
