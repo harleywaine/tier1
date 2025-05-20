@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import { Compass, House, User } from 'phosphor-react-native';
 import React from 'react';
-import { Platform } from 'react-native';
+import { Platform, View } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
 import TabBarBackground from '@/components/ui/TabBarBackground';
@@ -22,29 +22,49 @@ export default function TabLayout() {
           ios: {
             // Use a transparent background on iOS to show the blur effect
             position: 'absolute',
+            height: 80,
+            paddingTop: 18,
           },
-          default: {},
+          default: {
+            height: 80,
+            paddingTop: 18,
+          },
         }),
+        tabBarIconStyle: {
+          marginTop: -12,
+        },
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <House size={28} color={color} weight="fill" />,
+          tabBarIcon: ({ color }) => (
+            <View style={{ marginTop: -6 }}>
+              <House size={28} color={color} weight="regular" />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
         name="explore"
         options={{
           title: 'Explore',
-          tabBarIcon: ({ color }) => <Compass size={28} color={color} weight="fill" />,
+          tabBarIcon: ({ color }) => (
+            <View style={{ marginTop: -6 }}>
+              <Compass size={28} color={color} weight="regular" />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
         name="account"
         options={{
           title: 'Account',
-          tabBarIcon: ({ color }) => <User size={28} color={color} weight="fill" />,
+          tabBarIcon: ({ color }) => (
+            <View style={{ marginTop: -6 }}>
+              <User size={28} color={color} weight="regular" />
+            </View>
+          ),
         }}
       />
     </Tabs>

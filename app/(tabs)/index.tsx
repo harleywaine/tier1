@@ -96,7 +96,9 @@ export default function HomeScreen() {
       {/* Collections */}
       <View style={styles.collectionsHeader}>
         <Text style={styles.sectionTitle}>Collections</Text>
-        <TouchableOpacity><Text style={styles.viewAll}>View all</Text></TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push('/explore')}>
+          <Text style={styles.viewAll}>View all</Text>
+        </TouchableOpacity>
       </View>
       <FlatList
         data={collections}
