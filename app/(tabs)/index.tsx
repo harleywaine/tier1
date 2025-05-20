@@ -61,6 +61,15 @@ export default function HomeScreen() {
   // ListHeaderComponent for FlatList
   const renderHeader = () => (
     <>
+      {/* Top-right Avatar */}
+      <TouchableOpacity
+        style={styles.avatarAbsolute}
+        onPress={() => router.push('/account')}
+      >
+        <View style={styles.avatar}>
+          <Text style={styles.avatarInitials}>AJ</Text>
+        </View>
+      </TouchableOpacity>
       {/* Header */}
       <View style={[styles.header, { paddingTop: rem(2.5) }]}>
         <View>
@@ -184,5 +193,36 @@ const styles = StyleSheet.create({
     color: '#aaa',
     fontSize: 16,
     fontWeight: '500',
+  },
+  avatarContainer: {
+    marginLeft: 12,
+  },
+  avatarAbsolute: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    zIndex: 10,
+    paddingTop: 8,
+    paddingRight: 8,
+  },
+  avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#23272e',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  avatarInitials: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 18,
+    letterSpacing: 1,
   },
 });
