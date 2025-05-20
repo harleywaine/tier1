@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 24,
+    padding: 17,
     backgroundColor: 'transparent',
   },
   header: {
@@ -166,9 +166,9 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: '#fff',
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: '700',
-    marginBottom: 12,
+    marginBottom: 10,
     marginTop: 8,
   },
   collectionsHeader: {

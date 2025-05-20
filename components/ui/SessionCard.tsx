@@ -34,23 +34,31 @@ export const SessionCard = ({
     onPress={onButtonPress}
     activeOpacity={0.7}
   >
-    <View style={[styles.sessionCardContent, compact && styles.sessionCardContentCompact]}>
-      <View style={[styles.sessionCardIcon, compact && styles.sessionCardIconCompact]}>
+    <View style={[
+      styles.sessionCardContent,
+      compact && styles.sessionCardContentCompact,
+      large && styles.sessionCardContentNoPadding,
+      large && { flexDirection: 'column', alignItems: 'flex-start', paddingBottom: 0 }
+    ]}>
+      <View style={[styles.sessionCardIcon, compact && styles.sessionCardIconCompact, large && { marginRight: 0, marginBottom: 12 }]}>
         <Text style={{fontSize: large ? 28 : compact ? 20 : 22, color: '#fff', opacity: 0.8}}>▶</Text>
       </View>
-      <View style={{ flex: 1 }}>
+      <View style={[large ? { width: '100%' } : { flex: 1 }]}>
         <Text style={[styles.sessionCardTitle, large && styles.sessionCardTitleLarge, compact && styles.sessionCardTitleCompact]}>{title}</Text>
         {subtitle && <Text style={styles.sessionCardSubtitle}>{subtitle}</Text>}
         {description && <Text style={styles.sessionCardDescription}>{description}</Text>}
+        {large && duration && (
+          <Text style={[styles.sessionCardDuration, { marginLeft: 0, marginTop: 6 }]}>{duration}</Text>
+        )}
         {plays && <Text style={styles.sessionCardSubtitle}>{plays}</Text>}
       </View>
-      {duration && !compact && <Text style={styles.sessionCardDuration}>{duration}</Text>}
+      {duration && !compact && !large && <Text style={styles.sessionCardDuration}>{duration}</Text>}
     </View>
     {progress !== undefined && !compact && (
       <View style={styles.progressBar}><View style={[styles.progressFill, { width: `${progress * 100}%` }]} /></View>
     )}
     {large && (
-      <View style={{ marginTop: 16 }}>
+      <View style={{ marginTop: 16, width: '100%' }}>
         <GradientButton title={buttonLabel || ''} onPress={onButtonPress} />
       </View>
     )}
@@ -59,7 +67,7 @@ export const SessionCard = ({
 
 const styles = StyleSheet.create({
   sessionCard: {
-    backgroundColor: 'rgba(255,255,255,0.03)',
+    backgroundColor: 'rgba(0,0,0,0.22)',
     borderRadius: 18,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
@@ -70,11 +78,17 @@ const styles = StyleSheet.create({
   sessionCardLarge: {
     padding: 18,
   },
+  sessionCardLargeNoContentPadding: {
+    padding: 18,
+  },
   sessionCardContent: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 18,
     paddingBottom: 10,
+  },
+  sessionCardContentNoPadding: {
+    padding: 0,
   },
   sessionCardIcon: {
     width: 44,

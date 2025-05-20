@@ -1,7 +1,9 @@
 import { Background } from '@/components/ui/Background';
+import { CollectionCard } from '@/components/ui/CollectionCard';
+import { SwitchCard } from '@/components/ui/SwitchCard';
 import { Lightning, Moon, Trophy, WaveSawtooth } from 'phosphor-react-native';
 import React from 'react';
-import { Dimensions, FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 interface CollectionCardProps {
   icon: React.ComponentType<any>;
@@ -24,37 +26,38 @@ const baseFontSize = 16; // Base font size for REM calculations
 const rem = (size: number) => size * baseFontSize;
 const vh = windowHeight / 100;
 
-const CollectionCard: React.FC<CollectionCardProps> = ({ icon: Icon, title, sessions, color }) => (
-  <View style={styles.collectionCard}>
-    <View style={[styles.iconCircle, { backgroundColor: color[0] }]}>
-      <Icon size={32} color="#fff" weight="bold" />
-    </View>
-    <View style={styles.collectionInfo}>
-      <Text style={styles.collectionTitle}>{title}</Text>
-      <Text style={styles.collectionSubtitle}>{`${sessions} sessions`}</Text>
-    </View>
-  </View>
-);
+const switchCardShadow = {
+  shadowColor: '#000',
+  shadowOpacity: 0.12,
+  shadowRadius: 8,
+  shadowOffset: { width: 0, height: 2 },
+  elevation: 4,
+};
 
 export default function ExploreScreen() {
   return (
     <Background>
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.container}>
+        <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: rem(4) }} showsVerticalScrollIndicator={false}>
           <View style={[styles.header, { paddingTop: rem(2.5) }]}>
             <View>
               <Text style={styles.title}>EXPLORE</Text>
               <Text style={styles.subtitle}>Categories</Text>
             </View>
           </View>
-          <FlatList
-            data={collections}
-            keyExtractor={item => item.title}
-            renderItem={({ item }) => <CollectionCard {...item} />}
-            contentContainerStyle={{ gap: 16, paddingBottom: rem(4) }}
-            showsVerticalScrollIndicator={false}
-          />
-        </View>
+          <Text style={styles.sectionTitle}>Quick Switches</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 32 }}>
+            <SwitchCard icon={Lightning} title="Switch On" color={["#3ad0ff"]} style={switchCardShadow} />
+            <SwitchCard icon={Moon} title="Switch Off" color={["#6ee7b7"]} style={switchCardShadow} />
+            <SwitchCard icon={Trophy} title="Take Control" color={["#fbbf24"]} style={switchCardShadow} />
+          </View>
+          <Text style={styles.sectionTitle}>Training</Text>
+          <View style={{ gap: 16 }}>
+            {collections.map(item => (
+              <CollectionCard key={item.title} {...item} fullWidth />
+            ))}
+          </View>
+        </ScrollView>
       </SafeAreaView>
     </Background>
   );
@@ -67,7 +70,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 24,
+    padding: 17,
     backgroundColor: 'transparent',
   },
   header: {
@@ -86,39 +89,11 @@ const styles = StyleSheet.create({
     color: '#aaa',
     marginTop: 2,
   },
-  collectionCard: {
-    width: '100%',
-    height: 110,
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    borderRadius: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 18,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-  },
-  iconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 18,
-  },
-  collectionInfo: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    backgroundColor: 'transparent',
-  },
-  collectionTitle: {
+  sectionTitle: {
     color: '#fff',
+    fontSize: 22,
     fontWeight: '700',
-    fontSize: 18, // Medium
-    marginBottom: 2,
-  },
-  collectionSubtitle: {
-    color: '#aaa',
-    fontSize: 16, // Small
+    marginBottom: 10,
+    marginTop: 8,
   },
 });

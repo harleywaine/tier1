@@ -6,10 +6,11 @@ interface CollectionCardProps {
   title: string;
   sessions: number;
   color: string[];
+  fullWidth?: boolean;
 }
 
-export const CollectionCard = ({ icon: Icon, title, sessions, color }: CollectionCardProps) => (
-  <View style={styles.collectionCard}>
+export const CollectionCard = ({ icon: Icon, title, sessions, color, fullWidth }: CollectionCardProps) => (
+  <View style={[styles.collectionCard, fullWidth && styles.collectionCardFullWidth]}>
     <View style={[styles.iconCircle, { backgroundColor: color[0] }]}>
       <Icon size={28} color="#fff" weight="bold" />
     </View>
@@ -24,7 +25,7 @@ const styles = StyleSheet.create({
   collectionCard: {
     width: 240,
     height: 110,
-    backgroundColor: 'rgba(255,255,255,0.03)',
+    backgroundColor: 'rgba(0,0,0,0.22)',
     borderRadius: 20,
     flexDirection: 'row',
     alignItems: 'center',
@@ -32,6 +33,9 @@ const styles = StyleSheet.create({
     marginRight: 0,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
+  },
+  collectionCardFullWidth: {
+    width: '100%',
   },
   iconCircle: {
     width: 48,
