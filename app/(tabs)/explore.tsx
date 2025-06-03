@@ -1,9 +1,10 @@
 import { Background } from '@/components/ui/Background';
 import { CollectionCard } from '@/components/ui/CollectionCard';
 import { SwitchCard } from '@/components/ui/SwitchCard';
+import { useRouter } from 'expo-router';
 import { Lightning, Moon, Trophy, WaveSawtooth } from 'phosphor-react-native';
 import React from 'react';
-import { Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface CollectionCardProps {
   icon: React.ComponentType<any>;
@@ -35,6 +36,7 @@ const switchCardShadow = {
 };
 
 export default function ExploreScreen() {
+  const router = useRouter();
   return (
     <Background>
       <SafeAreaView style={styles.safeArea}>
@@ -54,7 +56,9 @@ export default function ExploreScreen() {
           <Text style={styles.sectionTitle}>Training</Text>
           <View style={{ gap: 16 }}>
             {collections.map(item => (
-              <CollectionCard key={item.title} {...item} fullWidth />
+              <TouchableOpacity key={item.title} onPress={() => router.push({ pathname: '/collection' as any, params: { title: item.title } })}>
+                <CollectionCard {...item} fullWidth />
+              </TouchableOpacity>
             ))}
           </View>
         </ScrollView>

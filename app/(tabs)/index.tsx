@@ -45,6 +45,7 @@ const popularSessions = {
 export default function HomeScreen() {
   const router = useRouter();
   const [selectedTab, setSelectedTab] = useState<keyof typeof popularSessions>('all');
+  const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
 
   const handleSessionPress = (title: string, duration: string, description?: string) => {
     router.push({
@@ -55,6 +56,13 @@ export default function HomeScreen() {
         description,
         audioUrl: 'https://example.com/audio.mp3' // Replace with actual audio URL
       }
+    });
+  };
+
+  const handleCollectionPress = (title: string) => {
+    router.push({
+      pathname: '/collection' as any,
+      params: { title }
     });
   };
 
@@ -115,7 +123,11 @@ export default function HomeScreen() {
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ gap: 12, paddingVertical: 8 }}
-        renderItem={({ item }) => <CollectionCard {...item} />}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => handleCollectionPress(item.title)}>
+            <CollectionCard {...item} />
+          </TouchableOpacity>
+        )}
         style={{ marginBottom: 16 }}
       />
 

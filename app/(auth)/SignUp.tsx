@@ -123,5 +123,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: 'rgba(255, 255, 255, 0.7)',
     fontSize: rem(0.875),
+    marginTop: rem(1),
   },
 });
