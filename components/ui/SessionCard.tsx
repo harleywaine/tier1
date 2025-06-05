@@ -69,11 +69,15 @@ const styles = StyleSheet.create({
   sessionCard: {
     backgroundColor: 'rgba(0,0,0,0.22)',
     borderRadius: 18,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
     marginBottom: 20,
     padding: 0,
-    overflow: 'hidden',
+    // Shadow for iOS
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 12,
+    // Shadow for Android
+    elevation: 12,
   },
   sessionCardLarge: {
     padding: 18,

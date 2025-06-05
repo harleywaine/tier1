@@ -50,36 +50,37 @@ export default function SignUp() {
   return (
     <Background>
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.header}>
-          <Text style={styles.title}>TIER 1</Text>
-          <Text style={styles.subtitle}>Create Account</Text>
-        </View>
-
-        <View style={styles.form}>
-          <TextInput
-            placeholder="Email"
-            placeholderTextColor="rgba(255, 255, 255, 0.5)"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            style={styles.input}
-          />
-          <TextInput
-            placeholder="Password"
-            placeholderTextColor="rgba(255, 255, 255, 0.5)"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            style={styles.input}
-          />
-          <GradientButton
-            title={loading ? 'Creating account...' : 'Sign Up'}
-            onPress={loading ? undefined : handleSignUp}
-          />
-          <TouchableOpacity onPress={() => router.push('../SignIn')}>
-            <Text style={styles.link}>Already have an account? Sign In</Text>
-          </TouchableOpacity>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.title}>TIER 1</Text>
+            <Text style={styles.subtitle}>Create Account</Text>
+          </View>
+          <View style={styles.form}>
+            <TextInput
+              placeholder="Email"
+              placeholderTextColor="rgba(255, 255, 255, 0.5)"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              style={styles.input}
+            />
+            <TextInput
+              placeholder="Password"
+              placeholderTextColor="rgba(255, 255, 255, 0.5)"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              style={styles.input}
+            />
+            <GradientButton
+              title={loading ? 'Creating account...' : 'Sign Up'}
+              onPress={loading ? undefined : handleSignUp}
+            />
+            <TouchableOpacity onPress={() => router.push('../SignIn')}>
+              <Text style={styles.link}>Already have an account? Sign In</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </SafeAreaView>
     </Background>
@@ -90,26 +91,33 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  header: {
-    marginTop: rem(2.5),
-    marginBottom: rem(3),
+  container: {
+    flex: 1,
     paddingHorizontal: rem(1.5),
+    paddingTop: rem(1.5),
+  },
+  header: {
+    marginTop: rem(6),
+    marginBottom: rem(1),
+    alignItems: 'center',
   },
   title: {
     fontSize: rem(2),
-    fontWeight: '700',
+    fontFamily: 'SFProDisplay-Bold',
     color: '#fff',
     letterSpacing: 2,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: rem(1.25),
     color: 'rgba(255, 255, 255, 0.7)',
     marginTop: rem(0.5),
+    textAlign: 'center',
+    fontFamily: 'SFProDisplay-Light',
   },
   form: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: rem(1.5),
   },
   input: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -124,5 +132,6 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.7)',
     fontSize: rem(0.875),
     marginTop: rem(1),
+    fontFamily: 'SFProDisplay-Light',
   },
 });

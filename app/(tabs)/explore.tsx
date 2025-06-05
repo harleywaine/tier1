@@ -85,18 +85,19 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28, // Large
-    fontWeight: '700',
+    fontFamily: 'SFProDisplay-Bold',
     color: '#fff',
   },
   subtitle: {
     fontSize: 16, // Small
     color: '#aaa',
     marginTop: 2,
+    fontFamily: 'SFProDisplay-Light',
   },
   sectionTitle: {
     color: '#fff',
-    fontSize: 22,
-    fontWeight: '700',
+    fontSize: 20,
+    fontFamily: 'SFProDisplay-Bold',
     marginBottom: 10,
     marginTop: 8,
   },

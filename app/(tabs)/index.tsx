@@ -3,7 +3,7 @@ import { CollectionCard } from '@/components/ui/CollectionCard';
 import { SessionCard } from '@/components/ui/SessionCard';
 import { TabSelector } from '@/components/ui/TabSelector';
 import { useRouter } from 'expo-router';
-import { Lightning, Moon, Trophy, WaveSawtooth } from 'phosphor-react-native';
+import { Lightning, Moon, Trophy, UserCircle, WaveSawtooth } from 'phosphor-react-native';
 import React, { useState } from 'react';
 import { Dimensions, FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -74,9 +74,7 @@ export default function HomeScreen() {
         style={styles.avatarAbsolute}
         onPress={() => router.push('/account')}
       >
-        <View style={styles.avatar}>
-          <Text style={styles.avatarInitials}>AJ</Text>
-        </View>
+        <UserCircle size={36} color="#fff" weight="regular" />
       </TouchableOpacity>
       {/* Header */}
       <View style={[styles.header, { paddingTop: rem(2.5) }]}>
@@ -85,15 +83,6 @@ export default function HomeScreen() {
           <Text style={styles.subtitle}>Mindset</Text>
         </View>
       </View>
-
-      {/* Continue */}
-      <Text style={styles.sectionTitle}>Continue</Text>
-      <SessionCard
-        title="Pre-Competition Focus"
-        subtitle="12 min · 3 days ago"
-        progress={0.75}
-        onButtonPress={() => handleSessionPress('Pre-Competition Focus', '12 min')}
-      />
 
       {/* Today's Pick */}
       <Text style={styles.sectionTitle}>Today's Pick</Text>
@@ -128,7 +117,7 @@ export default function HomeScreen() {
             <CollectionCard {...item} />
           </TouchableOpacity>
         )}
-        style={{ marginBottom: 16 }}
+        style={{ marginBottom: 16, overflow: 'visible' }}
       />
 
       {/* Popular */}
@@ -179,18 +168,19 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: '700',
+    fontFamily: 'SFProDisplay-Bold',
     color: '#fff',
   },
   subtitle: {
     fontSize: 16,
     color: '#aaa',
     marginTop: 2,
+    fontFamily: 'SFProDisplay-Light',
   },
   sectionTitle: {
     color: '#fff',
-    fontSize: 22,
-    fontWeight: '700',
+    fontSize: 20,
+    fontFamily: 'SFProDisplay-Bold',
     marginBottom: 10,
     marginTop: 8,
   },
@@ -204,7 +194,7 @@ const styles = StyleSheet.create({
   viewAll: {
     color: '#aaa',
     fontSize: 16,
-    fontWeight: '500',
+    fontFamily: 'SFProDisplay-Light',
   },
   avatarContainer: {
     marginLeft: 12,
@@ -216,25 +206,5 @@ const styles = StyleSheet.create({
     zIndex: 10,
     paddingTop: 8,
     paddingRight: 8,
-  },
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#23272e',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-  },
-  avatarInitials: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 18,
-    letterSpacing: 1,
   },
 });

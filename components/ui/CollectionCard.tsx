@@ -31,8 +31,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 18,
     marginRight: 0,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    // Shadow for iOS
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 12,
+    // Shadow for Android
+    elevation: 12,
   },
   collectionCardFullWidth: {
     width: '100%',

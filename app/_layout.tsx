@@ -14,6 +14,8 @@ export default function RootLayout() {
   const segments = useSegments();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    'SFProDisplay-Bold': require('../assets/fonts/SF-Pro-Display-Bold.otf'),
+    'SFProDisplay-Light': require('../assets/fonts/SF-Pro-Display-Light.otf'),
   });
 
   // Use the correct type for session state

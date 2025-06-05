@@ -90,19 +90,24 @@ const styles = StyleSheet.create({
     paddingTop: rem(1.5),
   },
   header: {
-    marginTop: rem(2.5),
-    marginBottom: rem(3),
+    marginTop: rem(6),
+    marginBottom: rem(1),
+    paddingHorizontal: rem(1.5),
+    alignItems: 'center',
   },
   title: {
     fontSize: rem(2),
-    fontWeight: '700',
+    fontFamily: 'SFProDisplay-Bold',
     color: '#fff',
     letterSpacing: 2,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: rem(1.25),
     color: 'rgba(255, 255, 255, 0.7)',
     marginTop: rem(0.5),
+    textAlign: 'center',
+    fontFamily: 'SFProDisplay-Light',
   },
   form: {
     flex: 1,
@@ -121,5 +126,6 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.7)',
     fontSize: rem(0.875),
     marginTop: rem(1),
+    fontFamily: 'SFProDisplay-Light',
   },
 });

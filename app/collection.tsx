@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: '700',
+    fontWeight: '400',
     color: '#fff',
     marginTop: 60,
     marginBottom: 20,
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 22,
-    fontWeight: '700',
+    fontWeight: '400',
     color: '#fff',
     marginTop: 20,
     marginBottom: 10,

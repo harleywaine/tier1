@@ -104,13 +104,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: '700',
+    fontFamily: 'SFProDisplay-Bold',
     color: '#fff',
   },
   subtitle: {
     fontSize: 16,
     color: '#aaa',
     marginTop: 2,
+    fontFamily: 'SFProDisplay-Light',
   },
   infoContainer: {
     marginBottom: 20,
@@ -119,10 +120,11 @@ const styles = StyleSheet.create({
     color: '#aaa',
     fontSize: 16,
     marginBottom: 2,
+    fontFamily: 'SFProDisplay-Light',
   },
   value: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: 'SFProDisplay-Light',
   },
 }); 
