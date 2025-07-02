@@ -53,31 +53,31 @@ export default function AccountScreen() {
 
   return (
     <Background>
-      <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea}>
         <View style={styles.container}>
-          <View style={[styles.header, { paddingTop: rem(2.5) }]}>
-            <View>
-              <Text style={styles.title}>ACCOUNT</Text>
-              <Text style={styles.subtitle}>Settings</Text>
-            </View>
-          </View>
+      <View style={[styles.header, { paddingTop: rem(2.5) }]}>
+        <View>
+              <Text style={styles.title}>Account</Text>
+          <Text style={styles.subtitle}>Settings</Text>
+        </View>
+      </View>
           <View style={styles.content}>
-            <View style={styles.infoContainer}>
-              <Text style={styles.label}>Name</Text>
-              <Text style={styles.value}>Alex Johnson</Text>
-            </View>
-            <View style={styles.infoContainer}>
-              <Text style={styles.label}>Email</Text>
-              <Text style={styles.value}>alex@email.com</Text>
-            </View>
-            <GradientButton title="Account Settings" onPress={() => {}} />
+        <View style={styles.infoContainer}>
+          <Text style={styles.label}>Name</Text>
+          <Text style={styles.value}>Alex Johnson</Text>
+        </View>
+        <View style={styles.infoContainer}>
+          <Text style={styles.label}>Email</Text>
+          <Text style={styles.value}>alex@email.com</Text>
+        </View>
+        <GradientButton title="Account Settings" onPress={() => {}} />
             <SecondaryButton
               title={loading ? 'Signing out...' : 'Sign Out'}
               onPress={handleLogout}
             />
           </View>
-        </View>
-      </SafeAreaView>
+      </View>
+    </SafeAreaView>
     </Background>
   );
 }
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontFamily: 'SFProDisplay-Bold',
+    fontFamily: 'SFProDisplay-Regular',
     color: '#fff',
   },
   subtitle: {

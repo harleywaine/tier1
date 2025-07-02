@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 
 interface CollectionCardProps {
   icon: React.ComponentType<any>;
@@ -7,14 +7,15 @@ interface CollectionCardProps {
   sessions: number;
   color: string[];
   fullWidth?: boolean;
+  hideIcon?: boolean;
 }
 
-export const CollectionCard = ({ icon: Icon, title, sessions, color, fullWidth }: CollectionCardProps) => (
+export const CollectionCard = ({ icon: Icon, title, sessions, color, fullWidth, hideIcon }: CollectionCardProps) => (
   <View style={[styles.collectionCard, fullWidth && styles.collectionCardFullWidth]}>
-    <View style={[styles.iconCircle, { backgroundColor: color[0] }]}>
-      <Icon size={28} color="#fff" weight="bold" />
+    <View style={styles.iconCircle}>
+      <Icon size={28} color="#ffffff" weight="light" />
     </View>
-    <View style={styles.collectionInfo}>
+    <View style={styles.textContainer}>
       <Text style={styles.collectionTitle}>{title}</Text>
       <Text style={styles.collectionSubtitle}>{sessions} sessions</Text>
     </View>
@@ -24,12 +25,13 @@ export const CollectionCard = ({ icon: Icon, title, sessions, color, fullWidth }
 const styles = StyleSheet.create({
   collectionCard: {
     width: 240,
-    height: 110,
-    backgroundColor: 'rgba(0,0,0,0.22)',
+    height: 100,
+    backgroundColor: 'rgba(40, 40, 40, 0.65)',
     borderRadius: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 18,
+    paddingHorizontal: Platform.OS === 'ios' ? 10 : 18,
+    paddingVertical: 18,
     marginRight: 0,
     // Shadow for iOS
     shadowColor: '#000',
@@ -50,7 +52,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 18,
   },
-  collectionInfo: {
+  textContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'flex-start',
@@ -58,7 +60,7 @@ const styles = StyleSheet.create({
   },
   collectionTitle: {
     color: '#fff',
-    fontWeight: '700',
+    fontWeight: '400',
     fontSize: 20,
     marginBottom: 2,
   },

@@ -14,10 +14,10 @@ interface CollectionCardProps {
 }
 
 const collections = [
-  { title: 'Focus', sessions: 24, icon: Lightning, color: ['#3ad0ff', '#2563eb'] },
-  { title: 'Sleep', sessions: 18, icon: Moon, color: ['#6ee7b7', '#2563eb'] },
-  { title: 'Performance', sessions: 12, icon: Trophy, color: ['#fbbf24', '#f59e42'] },
-  { title: 'Recovery', sessions: 6, icon: WaveSawtooth, color: ['#38bdf8', '#6366f1'] },
+  { title: 'Focus', sessions: 24, icon: Lightning, color: ['#2a9d8f', '#1a6b61'] },
+  { title: 'Sleep', sessions: 18, icon: Moon, color: ['#6c757d', '#495057'] },
+  { title: 'Performance', sessions: 12, icon: Trophy, color: ['#e9c46a', '#a17e3d'] },
+  { title: 'Recovery', sessions: 6, icon: WaveSawtooth, color: ['#457b9d', '#2c4a63'] },
   // Add more as needed, e.g. Recovery, Performance
 ];
 
@@ -39,30 +39,30 @@ export default function ExploreScreen() {
   const router = useRouter();
   return (
     <Background>
-      <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea}>
         <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: rem(4) }} showsVerticalScrollIndicator={false}>
-          <View style={[styles.header, { paddingTop: rem(2.5) }]}>
-            <View>
-              <Text style={styles.title}>EXPLORE</Text>
-              <Text style={styles.subtitle}>Categories</Text>
-            </View>
-          </View>
+      <View style={[styles.header, { paddingTop: rem(2.5) }]}>
+        <View>
+              <Text style={styles.title}>Explore</Text>
+          <Text style={styles.subtitle}>Categories</Text>
+        </View>
+      </View>
           <Text style={styles.sectionTitle}>Quick Switches</Text>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 32 }}>
-            <SwitchCard icon={Lightning} title="Switch On" color={["#3ad0ff"]} style={switchCardShadow} />
-            <SwitchCard icon={Moon} title="Switch Off" color={["#6ee7b7"]} style={switchCardShadow} />
-            <SwitchCard icon={Trophy} title="Take Control" color={["#fbbf24"]} style={switchCardShadow} />
+            <SwitchCard icon={Lightning} title="Switch On" color={["#2a9d8f"]} style={switchCardShadow} />
+            <SwitchCard icon={Moon} title="Switch Off" color={["#6c757d"]} style={switchCardShadow} />
+            <SwitchCard icon={Trophy} title="Take Control" color={["#e9c46a"]} style={switchCardShadow} />
           </View>
           <Text style={styles.sectionTitle}>Training</Text>
           <View style={{ gap: 16 }}>
             {collections.map(item => (
               <TouchableOpacity key={item.title} onPress={() => router.push({ pathname: '/collection' as any, params: { title: item.title } })}>
-                <CollectionCard {...item} fullWidth />
+                <CollectionCard {...item} fullWidth hideIcon />
               </TouchableOpacity>
             ))}
-          </View>
+      </View>
         </ScrollView>
-      </SafeAreaView>
+    </SafeAreaView>
     </Background>
   );
 }
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28, // Large
-    fontFamily: 'SFProDisplay-Bold',
+    fontFamily: 'SFProDisplay-Regular',
     color: '#fff',
   },
   subtitle: {

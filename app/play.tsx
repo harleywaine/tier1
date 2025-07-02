@@ -1,10 +1,10 @@
 import { Background } from '@/components/ui/Background';
-import { Audio } from 'expo-audio';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Audio } from 'expo-av';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import LottieView from 'lottie-react-native';
 import { ArrowLeft, Pause, Play, SkipBack, SkipForward } from 'phosphor-react-native';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
@@ -88,11 +88,16 @@ export default function PlayScreen() {
         <View style={styles.container}>
           {/* Custom Back Button */}
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <ArrowLeft color="#e0f6ff" size={26} weight="bold" />
+            <ArrowLeft color="#e0f6ff" size={26} weight="light" />
           </TouchableOpacity>
           {/* Session Image Card */}
           <View style={styles.imageCard}>
-            <Image source={{ uri: imageUrl }} style={styles.image} />
+            <LottieView
+              source={require('@/assets/images/play-animation.json')}
+              autoPlay
+              loop
+              style={[styles.image, { marginTop: 90 }]}
+            />
           </View>
           {/* Title & Author */}
           <View style={styles.infoContainer}>
@@ -117,20 +122,13 @@ export default function PlayScreen() {
           {/* Controls */}
           <View style={styles.controls}>
             <TouchableOpacity onPress={() => seekTo(Math.max(0, position - 10000))} style={styles.skipButton}>
-              <SkipBack color="#e0f6ff" size={32} weight="bold" />
+              <SkipBack color="#ffffff" size={32} weight="light" style={{ opacity: 0.6 }} />
             </TouchableOpacity>
-            <LinearGradient
-              colors={['#0b4f6c', '#01b4d4', '#03d2b3']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.playPauseButton}
-            >
-              <TouchableOpacity onPress={isPlaying ? pauseSound : playSound} style={styles.playPauseTouchable}>
-                {isPlaying ? <Pause color="#fff" size={40} weight="fill" /> : <Play color="#fff" size={40} weight="fill" />}
-              </TouchableOpacity>
-            </LinearGradient>
+            <TouchableOpacity onPress={isPlaying ? pauseSound : playSound} style={[styles.playPauseButton, { backgroundColor: '#457b9d' }]}>
+              {isPlaying ? <Pause color="#fff" size={40} weight="fill" /> : <Play color="#fff" size={40} weight="fill" />}
+            </TouchableOpacity>
             <TouchableOpacity onPress={() => seekTo(Math.min(duration || 0, position + 10000))} style={styles.skipButton}>
-              <SkipForward color="#e0f6ff" size={32} weight="bold" />
+              <SkipForward color="#ffffff" size={32} weight="light" style={{ opacity: 0.6 }} />
             </TouchableOpacity>
           </View>
         </View>
@@ -156,7 +154,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     overflow: 'hidden',
     marginBottom: 24,
-    backgroundColor: '#222',
+    backgroundColor: 'transparent',
     shadowColor: '#000',
     shadowOpacity: 0.2,
     shadowRadius: 16,
@@ -164,8 +162,11 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   image: {
-    width: '100%',
-    height: '100%',
+    width: '65%',
+    height: '65%',
+    alignSelf: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
     resizeMode: 'cover',
   },
   infoContainer: {
@@ -227,7 +228,7 @@ const styles = StyleSheet.create({
   },
   playPauseButton: {
     borderRadius: 40,
-    padding: 3,
+    padding: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -21,7 +21,7 @@ export default function CollectionScreen() {
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.container}>
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <ArrowLeft color="#e0f6ff" size={26} weight="bold" />
+            <ArrowLeft color="#e0f6ff" size={26} weight="light" />
           </TouchableOpacity>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.description}>This is a placeholder description for the collection. It will be updated later.</Text>

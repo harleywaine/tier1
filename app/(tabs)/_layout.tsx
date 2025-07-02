@@ -40,7 +40,7 @@ export default function TabLayout() {
           title: 'Home',
           tabBarIcon: ({ color }) => (
             <View style={{ marginTop: -6 }}>
-              <House size={28} color={color} weight="regular" />
+              <House size={28} color={color} weight="light" />
             </View>
           ),
         }}
@@ -51,7 +51,7 @@ export default function TabLayout() {
           title: 'Explore',
           tabBarIcon: ({ color }) => (
             <View style={{ marginTop: -6 }}>
-              <Compass size={28} color={color} weight="regular" />
+              <Compass size={28} color={color} weight="light" />
             </View>
           ),
         }}
@@ -62,7 +62,7 @@ export default function TabLayout() {
           title: 'Account',
           tabBarIcon: ({ color }) => (
             <View style={{ marginTop: -6 }}>
-              <User size={28} color={color} weight="regular" />
+              <User size={28} color={color} weight="light" />
             </View>
           ),
         }}

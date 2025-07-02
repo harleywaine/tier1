@@ -15,7 +15,7 @@ export const GradientButton = ({ title, onPress, style }: GradientButtonProps) =
     style={[styles.buttonContainer, style]}
   >
     <LinearGradient
-      colors={['#0b4f6c', '#01b4d4', '#03d2b3']}
+      colors={['#457b9d', '#2c4a63']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 0 }}
       style={styles.gradientButton}

@@ -1,14 +1,15 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
 
 interface TabSelectorProps<T extends string> {
   tabs: { label: string; value: T }[];
   value: T;
   onChange: (val: T) => void;
+  style?: ViewStyle;
 }
 
-export const TabSelector = <T extends string>({ tabs, value, onChange }: TabSelectorProps<T>) => (
-  <View style={styles.tabSelectorContainer}>
+export const TabSelector = <T extends string>({ tabs, value, onChange, style }: TabSelectorProps<T>) => (
+  <View style={[styles.tabSelectorContainer, style]}>
     {tabs.map(tab => (
       <TouchableOpacity
         key={tab.value}

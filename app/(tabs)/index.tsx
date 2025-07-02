@@ -1,11 +1,11 @@
-import { Background } from '@/components/ui/Background';
 import { CollectionCard } from '@/components/ui/CollectionCard';
 import { SessionCard } from '@/components/ui/SessionCard';
 import { TabSelector } from '@/components/ui/TabSelector';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Lightning, Moon, Trophy, UserCircle, WaveSawtooth } from 'phosphor-react-native';
 import React, { useState } from 'react';
-import { Dimensions, FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, FlatList, ImageBackground, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
@@ -13,10 +13,10 @@ const baseFontSize = 16; // Base font size for REM calculations
 const rem = (size: number) => size * baseFontSize;
 
 const collections = [
-  { title: 'Focus', sessions: 8, icon: Lightning, color: ['#3ad0ff', '#2563eb'] },
-  { title: 'Recovery', sessions: 6, icon: WaveSawtooth, color: ['#38bdf8', '#6366f1'] },
-  { title: 'Performance', sessions: 12, icon: Trophy, color: ['#fbbf24', '#f59e42'] },
-  { title: 'Sleep', sessions: 5, icon: Moon, color: ['#6ee7b7', '#2563eb'] },
+  { title: 'Focus', sessions: 8, icon: Lightning, color: ['#2a9d8f', '#1a6b61'] },
+  { title: 'Recovery', sessions: 6, icon: WaveSawtooth, color: ['#457b9d', '#2c4a63'] },
+  { title: 'Performance', sessions: 12, icon: Trophy, color: ['#e9c46a', '#a17e3d'] },
+  { title: 'Sleep', sessions: 5, icon: Moon, color: ['#6c757d', '#495057'] },
 ];
 
 const popularTabs = [
@@ -74,7 +74,7 @@ export default function HomeScreen() {
         style={styles.avatarAbsolute}
         onPress={() => router.push('/account')}
       >
-        <UserCircle size={36} color="#fff" weight="regular" />
+        <UserCircle size={36} color="#fff" weight="light" />
       </TouchableOpacity>
       {/* Header */}
       <View style={[styles.header, { paddingTop: rem(2.5) }]}>
@@ -97,11 +97,12 @@ export default function HomeScreen() {
           '15 min',
           'Visualize your perfect performance and build confidence'
         )}
+        style={{ marginBottom: 8 }}
       />
 
       {/* Collections */}
       <View style={styles.collectionsHeader}>
-        <Text style={styles.sectionTitle}>Collections</Text>
+        <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>Collections</Text>
         <TouchableOpacity onPress={() => router.push('/explore')}>
           <Text style={styles.viewAll}>View all</Text>
         </TouchableOpacity>
@@ -111,23 +112,31 @@ export default function HomeScreen() {
         keyExtractor={item => item.title}
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 12, paddingVertical: 8 }}
+        contentContainerStyle={{ gap: 12 }}
         renderItem={({ item }) => (
           <TouchableOpacity onPress={() => handleCollectionPress(item.title)}>
-            <CollectionCard {...item} />
+            <CollectionCard {...item} hideIcon />
           </TouchableOpacity>
         )}
-        style={{ marginBottom: 16, overflow: 'visible' }}
+        style={{ marginBottom: 10, overflow: 'visible' }}
       />
 
       {/* Popular */}
-      <Text style={styles.sectionTitle}>Popular</Text>
-      <TabSelector tabs={popularTabs} value={selectedTab} onChange={setSelectedTab} />
+      <Text style={[styles.sectionTitle, { marginBottom: 10 }]}>Popular</Text>
+      <TabSelector tabs={popularTabs} value={selectedTab} onChange={setSelectedTab} style={{ marginBottom: 0 }} />
     </>
   );
 
   return (
-    <Background>
+    <ImageBackground
+      source={require('@/assets/images/Index-bg.jpg')}
+      style={styles.backgroundImage}
+      imageStyle={styles.backgroundImageStyle}
+    >
+      <LinearGradient
+        colors={['transparent', 'rgba(0, 0, 0, 0.5)']}
+        style={styles.gradient}
+      />
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.container}>
           <FlatList
@@ -142,11 +151,12 @@ export default function HomeScreen() {
               />
             )}
             ListHeaderComponent={renderHeader}
-            contentContainerStyle={{ gap: 14, paddingBottom: rem(4) }}
+            contentContainerStyle={{ gap: 10, paddingBottom: rem(4) }}
+            showsVerticalScrollIndicator={false}
           />
         </View>
       </SafeAreaView>
-    </Background>
+    </ImageBackground>
   );
 }
 
@@ -187,14 +197,15 @@ const styles = StyleSheet.create({
   collectionsHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
+    alignItems: 'flex-end',
+    marginBottom: 10,
     marginTop: 8,
   },
   viewAll: {
     color: '#aaa',
     fontSize: 16,
     fontFamily: 'SFProDisplay-Light',
+    lineHeight: 20,
   },
   avatarContainer: {
     marginLeft: 12,
@@ -206,5 +217,21 @@ const styles = StyleSheet.create({
     zIndex: 10,
     paddingTop: 8,
     paddingRight: 8,
+  },
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '30%',
+  },
+  backgroundImageStyle: {
+    opacity: 0.7,
+    transform: [{ scaleX: -1 }],
+  },
+  gradient: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: '100%',
   },
 });

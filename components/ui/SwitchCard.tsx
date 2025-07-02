@@ -9,12 +9,12 @@ interface SwitchCardProps {
 }
 
 const windowWidth = Dimensions.get('window').width;
-const cardWidth = windowWidth / 3 - 16; // 33% of page width minus some gap
+const cardWidth = windowWidth / 3 - 24; // 33% of page width minus some gap
 
 export const SwitchCard = ({ icon: Icon, title, color, style }: SwitchCardProps) => (
   <View style={[styles.switchCard, style]}>
     <View style={[styles.iconCircle, { backgroundColor: color[0] }]}> 
-      <Icon size={22} color="#fff" weight="bold" />
+      <Icon size={22} color="#fff" weight="light" />
     </View>
     <Text style={styles.switchTitle}>{title}</Text>
   </View>
@@ -23,13 +23,13 @@ export const SwitchCard = ({ icon: Icon, title, color, style }: SwitchCardProps)
 const styles = StyleSheet.create({
   switchCard: {
     width: cardWidth,
-    height: 90,
-    backgroundColor: 'rgba(0,0,0,0.22)',
+    height: 100,
+    backgroundColor: 'rgba(80, 80, 80, 0.22)',
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     marginHorizontal: 4,
-    paddingVertical: 10,
+    paddingVertical: 20,
     // Shadow for iOS
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -44,11 +44,11 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 6,
+    marginBottom: 12,
   },
   switchTitle: {
     color: '#fff',
-    fontWeight: '600',
+    fontWeight: '400',
     fontSize: 13,
     textAlign: 'center',
   },
