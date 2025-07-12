@@ -10,14 +10,22 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.tier1dev.tier1",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -40,6 +48,13 @@
     "experiments": {
       "typedRoutes": true
     },
-    "extra": {}
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "c147cb22-cdb9-4822-9d85-1e5b1b365fca"
+      },
+      "supabaseUrl": "https://xwuojtunlfiejqedflsk.supabase.co",
+      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh3dW9qdHVubGZpZWpxZWRmbHNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg5NTY2NDgsImV4cCI6MjA2NDUzMjY0OH0.IsQyiGEaTfQepuesCDlAtChCDQLdPjNaIZQrCV_r270"
+    }
   }
 }
