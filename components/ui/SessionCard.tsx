@@ -1,12 +1,18 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from 'react-native';
 import { GradientButton } from './GradientButton';
 
 interface SessionCardProps {
   title: string;
   subtitle?: string;
   buttonLabel?: string;
-  onButtonPress?: () => void;
+  onPress?: () => void;
   progress?: number;
   large?: boolean;
   duration?: string;
@@ -14,55 +20,100 @@ interface SessionCardProps {
   compact?: boolean;
   plays?: string;
   showBookmark?: boolean;
-  style?: any;
+  style?: ViewStyle;
 }
 
-export const SessionCard = ({ 
-  title, 
-  subtitle, 
-  buttonLabel, 
-  onButtonPress, 
-  progress, 
-  large, 
-  duration, 
-  description, 
-  compact, 
-  plays, 
-  showBookmark, 
-  style
+export const SessionCard = ({
+  title,
+  subtitle,
+  buttonLabel,
+  onPress,
+  progress,
+  large,
+  duration,
+  description,
+  compact,
+  plays,
+  showBookmark,
+  style,
 }: SessionCardProps) => (
-  <TouchableOpacity 
-    style={[styles.sessionCard, large && styles.sessionCardLarge, compact && styles.sessionCardCompact, style]}
-    onPress={onButtonPress}
+  <TouchableOpacity
+    style={[
+      styles.sessionCard,
+      large && styles.sessionCardLarge,
+      compact && styles.sessionCardCompact,
+      style,
+    ]}
+    onPress={onPress}
     activeOpacity={0.7}
   >
-    <View style={[
-      styles.sessionCardContent,
-      compact && styles.sessionCardContentCompact,
-      large && styles.sessionCardContentNoPadding,
-      large && { flexDirection: 'column', alignItems: 'flex-start', paddingBottom: 0 }
-    ]}>
+    <View
+      style={[
+        styles.sessionCardContent,
+        compact && styles.sessionCardContentCompact,
+        large && styles.sessionCardContentNoPadding,
+        large && {
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          paddingBottom: 0,
+        },
+      ]}
+    >
       {!large && (
-        <View style={[styles.sessionCardIcon, compact && styles.sessionCardIconCompact, large && { marginRight: 0, marginBottom: 12 }]}>
-        <Text style={{fontSize: large ? 28 : compact ? 20 : 22, color: '#fff', opacity: 0.8}}>▶</Text>
-      </View>
+        <View
+          style={[
+            styles.sessionCardIcon,
+            compact && styles.sessionCardIconCompact,
+            large && { marginRight: 0, marginBottom: 12 },
+          ]}
+        >
+          <Text
+            style={{
+              fontSize: large ? 28 : compact ? 20 : 22,
+              color: '#fff',
+              opacity: 0.8,
+            }}
+          >
+            ▶
+          </Text>
+        </View>
       )}
-      <View style={[large ? { width: '100%' } : { flex: 1 }]}>
-        <Text style={[styles.sessionCardTitle, large && styles.sessionCardTitleLarge, compact && styles.sessionCardTitleCompact]}>{title}</Text>
+      <View style={large ? { width: '100%' } : { flex: 1 }}>
+        <Text
+          style={[
+            styles.sessionCardTitle,
+            large && styles.sessionCardTitleLarge,
+            compact && styles.sessionCardTitleCompact,
+          ]}
+        >
+          {title}
+        </Text>
         {subtitle && <Text style={styles.sessionCardSubtitle}>{subtitle}</Text>}
-        {description && <Text style={styles.sessionCardDescription}>{description}</Text>}
+        {description && (
+          <Text style={styles.sessionCardDescription}>{description}</Text>
+        )}
         {large && duration && (
-          <Text style={[styles.sessionCardDuration, { marginLeft: 0, marginTop: 6 }]}>{duration}</Text>
+          <Text
+            style={[styles.sessionCardDuration, { marginLeft: 0, marginTop: 6 }]}
+          >
+            {duration}
+          </Text>
         )}
       </View>
-      {duration && !compact && !large && <Text style={styles.sessionCardDuration}>{duration}</Text>}
+      {duration && !compact && !large && (
+        <Text style={styles.sessionCardDuration}>{duration}</Text>
+      )}
     </View>
+
     {progress !== undefined && !compact && (
-      <View style={styles.progressBar}><View style={[styles.progressFill, { width: `${progress * 100}%` }]} /></View>
+      <View style={styles.progressBar}>
+        <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
+      </View>
     )}
+
     {large && (
       <View style={{ marginTop: 16, width: '100%' }}>
-        <GradientButton title={buttonLabel || ''} onPress={onButtonPress} />
+        <GradientButton title={buttonLabel || ''} onPress={onPress} />
       </View>
     )}
   </TouchableOpacity>
@@ -74,18 +125,13 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     marginBottom: 20,
     padding: 0,
-    // Shadow for iOS
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 12,
-    // Shadow for Android
     elevation: 12,
   },
   sessionCardLarge: {
-    padding: 18,
-  },
-  sessionCardLargeNoContentPadding: {
     padding: 18,
   },
   sessionCardContent: {
@@ -132,27 +178,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginLeft: 8,
   },
-  sessionCardButton: {
-    backgroundColor: '#111',
-    borderRadius: 16,
-    paddingHorizontal: 18,
-    paddingVertical: 7,
-    marginLeft: 12,
-  },
-  sessionCardButtonText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 16,
-  },
-  progressBar: {
-    height: 3,
-    backgroundColor: '#222',
-    width: '100%',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#01b4d4',
-  },
   sessionCardCompact: {
     padding: 0,
     marginBottom: 0,
@@ -173,4 +198,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'SF Pro Display Regular',
   },
-}); 
+  progressBar: {
+    height: 3,
+    backgroundColor: '#222',
+    width: '100%',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#01b4d4',
+  },
+});

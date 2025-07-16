@@ -19,6 +19,30 @@ export default function CollectionScreen() {
 
   const { course, maintenance, basic, loading, error } = useSessionsByCourseTitle(title);
 
+  const handlePress = (session: any) => {
+    console.log('🟡 Tapped session:', session);
+
+    if (!session.audio_url) {
+      console.warn('❌ No audio URL for session:', session.title);
+      return;
+    }
+
+    const encodedUrl = encodeURI(session.audio_url);
+    const params = {
+      audioUrl: encodedUrl,
+      title: session.title,
+      author: session.author || 'Unknown',
+      imageUrl: session.image_url || '',
+    };
+
+    console.log('🟢 Navigating to /play with params:', params);
+
+    router.push({
+      pathname: '/play',
+      params,
+    });
+  };
+
   return (
     <Background>
       <SafeAreaView style={styles.safeArea}>
@@ -42,6 +66,7 @@ export default function CollectionScreen() {
                 subtitle="Maintenance session"
                 compact
                 showBookmark
+                onPress={() => handlePress(session)}
               />
             ))}
           </View>
@@ -55,6 +80,7 @@ export default function CollectionScreen() {
                 subtitle="Basic training session"
                 compact
                 showBookmark
+                onPress={() => handlePress(session)}
               />
             ))}
           </View>
@@ -65,36 +91,12 @@ export default function CollectionScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
-  scrollContainer: {
-    padding: 17,
-    paddingTop: 80,
-    paddingBottom: 40,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '400',
-    color: '#fff',
-    marginBottom: 20,
-  },
-  description: {
-    fontSize: 16,
-    color: '#aaa',
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: '400',
-    color: '#fff',
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  sessionsContainer: {
-    gap: 14,
-  },
+  safeArea: { flex: 1, backgroundColor: 'transparent' },
+  scrollContainer: { padding: 17, paddingTop: 80, paddingBottom: 40 },
+  title: { fontSize: 28, fontWeight: '400', color: '#fff', marginBottom: 20 },
+  description: { fontSize: 16, color: '#aaa', marginBottom: 20 },
+  sectionTitle: { fontSize: 22, fontWeight: '400', color: '#fff', marginTop: 20, marginBottom: 10 },
+  sessionsContainer: { gap: 14 },
   backButton: {
     position: 'absolute',
     top: 32,
@@ -112,6 +114,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export const options = {
-  headerShown: false,
-};
+export const options = { headerShown: false };

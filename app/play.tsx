@@ -1,136 +1,103 @@
 import { Background } from '@/components/ui/Background';
-import { Audio } from 'expo-av';
+import { useAudioPlayer } from '@/src/hooks/useAudioPlayer';
+import Slider from '@react-native-community/slider';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import LottieView from 'lottie-react-native';
 import { ArrowLeft, Pause, Play, SkipBack, SkipForward } from 'phosphor-react-native';
-import React, { useEffect, useState } from 'react';
-import { Dimensions, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
-const windowHeight = Dimensions.get('window').height;
-const windowWidth = Dimensions.get('window').width;
-const baseFontSize = 16;
-const rem = (size: number) => size * baseFontSize;
+import React, { useState } from 'react';
+import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function PlayScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams();
-  const [sound, setSound] = useState<any>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [duration, setDuration] = useState<number | null>(null);
-  const [position, setPosition] = useState<number>(0);
+  const params = useLocalSearchParams<{
+    audioUrl: string;
+    title?: string;
+    author?: string;
+  }>();
+  const audioUrl = decodeURIComponent(params.audioUrl);
+  const title = params.title || 'Session';
+  const author = params.author || 'Glenn Harrold';
 
-  useEffect(() => {
-    return sound
-      ? () => {
-          sound.unloadAsync();
-        }
-      : undefined;
-  }, [sound]);
+  const { status, isLoading, error, play, pause, seekTo } = useAudioPlayer(audioUrl);
 
-  async function playSound() {
-    try {
-      const audioUrl = params.audioUrl as string;
-      if (!audioUrl) {
-        console.error('No audio URL provided');
-        return;
-      }
-      const { sound: newSound } = await Audio.Sound.createAsync(
-        { uri: audioUrl },
-        { shouldPlay: true }
-      );
-      setSound(newSound);
-      setIsPlaying(true);
-      const status = await newSound.getStatusAsync();
-      if (status.isLoaded) {
-        setDuration(status.durationMillis || 0);
-      }
-      newSound.setOnPlaybackStatusUpdate((status: any) => {
-        if (status.isLoaded) {
-          setPosition(status.positionMillis || 0);
-          if (status.didJustFinish) {
-            setIsPlaying(false);
-          }
-        }
-      });
-    } catch (error) {
-      console.error('Error playing sound:', error);
-      setIsPlaying(false);
-    }
-  }
+  const isPlaying = (status as any)?.isPlaying ?? false;
+  const duration = (status as any)?.durationMillis ?? 0;
+  const position = (status as any)?.positionMillis ?? 0;
 
-  async function pauseSound() {
-    if (sound) {
-      await sound.pauseAsync();
-      setIsPlaying(false);
-    }
-  }
+  const [seeking, setSeeking] = useState(false);
+  const [seekPos, setSeekPos] = useState(0);
 
-  async function seekTo(position: number) {
-    if (sound) {
-      await sound.setPositionAsync(position);
-    }
-  }
+  const onSeekStart = () => setSeeking(true);
+  const onSeekComplete = (value: number) => {
+    setSeeking(false);
+    seekTo(value);
+  };
 
-  const formatTime = (milliseconds: number) => {
-    const totalSeconds = Math.floor(milliseconds / 1000);
+  const displayPosition = seeking ? seekPos : position;
+
+  const formatTime = (ms: number) => {
+    const totalSeconds = Math.floor(ms / 1000);
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  // Placeholder image or param
-  const imageUrl = params.imageUrl as string || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80';
-  const author = params.author as string || 'Glenn Harrold';
-
   return (
     <Background>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.container}>
-          {/* Custom Back Button */}
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
             <ArrowLeft color="#e0f6ff" size={26} weight="light" />
           </TouchableOpacity>
-          {/* Session Image Card */}
-          <View style={styles.imageCard}>
-            <LottieView
-              source={require('@/assets/images/play-animation.json')}
-              autoPlay
-              loop
-              style={[styles.image, { marginTop: 90 }]}
-            />
-          </View>
-          {/* Title & Author */}
-          <View style={styles.infoContainer}>
-            <Text style={styles.title}>{params.title || 'Session'}</Text>
-            <Text style={styles.author}>{author}</Text>
-          </View>
-          {/* Progress Bar */}
-          <View style={styles.progressContainer}>
-            <View style={styles.progressBar}>
-              <View 
-                style={[
-                  styles.progressFill, 
-                  { width: `${(position / (duration || 1)) * 100}%` }
-                ]} 
+
+          <View style={styles.lottieInfoWrapper}>
+            <View style={styles.imageCard}>
+              <LottieView
+                source={require('@/assets/images/play-animation.json')}
+                autoPlay
+                loop
+                style={styles.image}
               />
             </View>
-            <View style={styles.timeContainer}>
-              <Text style={styles.timeText}>{formatTime(position)}</Text>
-              <Text style={styles.timeText}>{formatTime(duration || 0)}</Text>
+            <View style={styles.infoContainer}>
+              <Text style={styles.title}>{title}</Text>
+              <Text style={styles.author}>{author}</Text>
             </View>
           </View>
-          {/* Controls */}
+
+          <View style={styles.sliderContainer}>
+            <Slider
+              style={{ height: 20, marginBottom: 12 }} // increased bottom margin
+              minimumValue={0}
+              maximumValue={duration}
+              value={displayPosition}
+              minimumTrackTintColor="#01b4d4"
+              maximumTrackTintColor="rgba(255,255,255,0.3)"
+              thumbTintColor="#457b9d"
+              onSlidingStart={onSeekStart}
+              onValueChange={setSeekPos}
+              onSlidingComplete={onSeekComplete}
+            />
+            <View style={styles.timeContainer}>
+              <Text style={styles.timeText}>{formatTime(displayPosition)}</Text>
+              <Text style={styles.timeText}>{formatTime(duration)}</Text>
+            </View>
+          </View>
+
           <View style={styles.controls}>
-            <TouchableOpacity onPress={() => seekTo(Math.max(0, position - 10000))} style={styles.skipButton}>
+            <TouchableOpacity onPress={() => seekTo(Math.max(0, displayPosition - 10000))} style={styles.skipButton}>
               <SkipBack color="#ffffff" size={32} weight="light" style={{ opacity: 0.6 }} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={isPlaying ? pauseSound : playSound} style={[styles.playPauseButton, { backgroundColor: '#457b9d' }]}>
+            <TouchableOpacity onPress={isPlaying ? pause : play} style={[styles.playPauseButton, { backgroundColor: '#457b9d' }]}>
               {isPlaying ? <Pause color="#fff" size={40} weight="fill" /> : <Play color="#fff" size={40} weight="fill" />}
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => seekTo(Math.min(duration || 0, position + 10000))} style={styles.skipButton}>
+            <TouchableOpacity onPress={() => seekTo(Math.min(duration, displayPosition + 10000))} style={styles.skipButton}>
               <SkipForward color="#ffffff" size={32} weight="light" style={{ opacity: 0.6 }} />
             </TouchableOpacity>
           </View>
+
+          {isLoading && <Text style={styles.loadingText}>Loading audio...</Text>}
+          {error && <Text style={styles.errorText}>{String(error)}</Text>}
         </View>
       </SafeAreaView>
     </Background>
@@ -138,22 +105,14 @@ export default function PlayScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
-  container: {
-    flex: 1,
-    padding: 17,
-    backgroundColor: 'transparent',
-    alignItems: 'center',
-  },
+  safeArea: { flex: 1, backgroundColor: 'transparent' },
+  container: { flex: 1, padding: 17, backgroundColor: 'transparent', alignItems: 'center' },
+  lottieInfoWrapper: { marginTop: 100, alignItems: 'center' },
   imageCard: {
     width: '100%',
     aspectRatio: 1,
     borderRadius: 28,
     overflow: 'hidden',
-    marginBottom: 24,
     backgroundColor: 'transparent',
     shadowColor: '#000',
     shadowOpacity: 0.2,
@@ -161,84 +120,16 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 8 },
     elevation: 8,
   },
-  image: {
-    width: '65%',
-    height: '65%',
-    alignSelf: 'center',
-    justifyContent: 'center',
-    alignItems: 'center',
-    resizeMode: 'cover',
-  },
-  infoContainer: {
-    alignItems: 'center',
-    marginBottom: 18,
-  },
-  title: {
-    fontSize: 24,
-    fontFamily: 'SFProDisplay-Bold',
-    color: '#fff',
-    marginBottom: 4,
-  },
-  author: {
-    fontSize: 16,
-    color: '#aaa',
-    fontFamily: 'SFProDisplay-Light',
-  },
-  progressContainer: {
-    width: '100%',
-    marginBottom: 12,
-  },
-  progressBar: {
-    height: 5,
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    borderRadius: 3,
-    marginBottom: 6,
-    width: '100%',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#01b4d4',
-    borderRadius: 3,
-  },
-  timeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  timeText: {
-    color: '#e0f6ff',
-    fontSize: 13,
-    fontFamily: 'SFProDisplay-Light',
-    opacity: 0.7,
-  },
-  controls: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 36,
-    marginTop: 24,
-    marginBottom: 0,
-  },
-  skipButton: {
-    backgroundColor: 'transparent',
-    borderRadius: 32,
-    padding: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  playPauseButton: {
-    borderRadius: 40,
-    padding: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  playPauseTouchable: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  image: { width: '65%', height: '65%', alignSelf: 'center' },
+  infoContainer: { alignItems: 'center', marginTop: 12 },
+  title: { fontSize: 24, fontFamily: 'SFProDisplay-Bold', color: '#fff', marginBottom: 4 },
+  author: { fontSize: 16, color: '#aaa', fontFamily: 'SFProDisplay-Light' },
+  sliderContainer: { width: '100%', marginTop: 12 },
+  timeContainer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 },
+  timeText: { color: '#e0f6ff', fontSize: 13, opacity: 0.7 },
+  controls: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 36, marginTop: 24 },
+  skipButton: { backgroundColor: 'transparent', borderRadius: 32, padding: 8, alignItems: 'center', justifyContent: 'center' },
+  playPauseButton: { borderRadius: 40, padding: 16, alignItems: 'center', justifyContent: 'center' },
   backButton: {
     position: 'absolute',
     top: 32,
@@ -254,12 +145,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
   },
+  loadingText: { color: '#fff', marginTop: 20 },
+  errorText: { color: 'red', marginTop: 12 },
 });
-
-export const unstable_settings = {
-  initialRouteName: 'play',
-};
-
-export const options = {
-  headerShown: false,
-}; 
