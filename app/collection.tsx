@@ -1,17 +1,17 @@
 import { Background } from '@/components/ui/Background';
 import { SessionCard } from '@/components/ui/SessionCard';
+import { useSessionsByCourseTitle } from '@/src/hooks/useSessionsByCourseTitle';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft } from 'phosphor-react-native';
 import React from 'react';
 import {
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  ScrollView,
 } from 'react-native';
-import { useSessionsByCourseTitle } from '@/src/hooks/useSessionsByCourseTitle';
 
 export default function CollectionScreen() {
   const { title } = useLocalSearchParams<{ title: string }>();

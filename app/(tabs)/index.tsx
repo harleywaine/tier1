@@ -92,7 +92,7 @@ export default function HomeScreen() {
         buttonLabel="Start Session"
         duration="15 min"
         large
-        onButtonPress={() => handleSessionPress(
+        onPress={() => handleSessionPress(
           'Mental Edge Visualization',
           '15 min',
           'Visualize your perfect performance and build confidence'
