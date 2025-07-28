@@ -1,45 +1,52 @@
 import React from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 interface CollectionCardProps {
-  icon: React.ComponentType<any>;
+  icon?: React.ComponentType<any>;
   title: string;
   sessions: number;
-  color: string[];
+  color?: string[];
   fullWidth?: boolean;
   hideIcon?: boolean;
+  disabled?: boolean;
 }
 
-export const CollectionCard = ({ icon: Icon, title, sessions, color, fullWidth, hideIcon }: CollectionCardProps) => (
-  <View style={[styles.collectionCard, fullWidth && styles.collectionCardFullWidth]}>
-    <View style={styles.iconCircle}>
-      <Icon size={28} color="#ffffff" weight="light" />
-    </View>
+export const CollectionCard = ({ icon: Icon, title, sessions, color, fullWidth, hideIcon, disabled }: CollectionCardProps) => {
+  console.log('🎨 CollectionCard received color prop:', color, 'for title:', title);
+  const appliedColor = color && color.length > 0 ? color[0] : null;
+  console.log('🎨 Applied color:', appliedColor);
+  
+  return (
+  <View style={[
+    styles.collectionCard,
+    fullWidth && styles.collectionCardFullWidth,
+    disabled && styles.collectionCardDisabled,
+    appliedColor && { backgroundColor: appliedColor }
+  ]}>
+    {Icon && !hideIcon ? (
+      <View style={styles.iconCircle}>
+        <Icon size={28} color="#ffffff" weight="light" />
+      </View>
+    ) : null}
     <View style={styles.textContainer}>
       <Text style={styles.collectionTitle}>{title}</Text>
       <Text style={styles.collectionSubtitle}>{sessions} sessions</Text>
     </View>
   </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   collectionCard: {
     width: 240,
     height: 100,
     backgroundColor: 'rgba(40, 40, 40, 0.65)',
-    borderRadius: 20,
+    borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Platform.OS === 'ios' ? 10 : 18,
+    paddingHorizontal: 24,
     paddingVertical: 18,
     marginRight: 0,
-    // Shadow for iOS
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 12,
-    // Shadow for Android
-    elevation: 12,
   },
   collectionCardFullWidth: {
     width: '100%',
@@ -67,5 +74,8 @@ const styles = StyleSheet.create({
   collectionSubtitle: {
     color: '#aaa',
     fontSize: 15,
+  },
+  collectionCardDisabled: {
+    opacity: 0.75,
   },
 }); 

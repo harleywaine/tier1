@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useEffect, useState } from 'react';
 
 export interface Course {
   id: string;
@@ -7,6 +7,13 @@ export interface Course {
   description: string | null;
   created_at: string;
   sessionCount?: number;
+  disabled?: boolean;
+  theme_id?: string;
+  theme?: {
+    id: string;
+    name: string;
+    display_name: string;
+  };
 }
 
 export function useCourses() {
@@ -18,7 +25,10 @@ export function useCourses() {
     async function fetchCourses() {
       const { data: courseData, error: courseError } = await supabase
         .from('courses')
-        .select('*')
+        .select(`
+          *,
+          theme:collection_themes(id, name, display_name)
+        `)
         .order('created_at', { ascending: true });
 
       if (courseError) {

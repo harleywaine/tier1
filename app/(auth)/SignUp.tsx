@@ -2,7 +2,21 @@ import { Background } from '@/components/ui/Background';
 import { GradientButton } from '@/components/ui/GradientButton';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Dimensions, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  Dimensions,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import { supabase } from '../../lib/supabase';
 
 const windowHeight = Dimensions.get('window').height;
@@ -14,18 +28,24 @@ export default function SignUp() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async () => {
     try {
       setLoading(true);
       console.log('Attempting sign up with:', { email });
-      
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: 'tier1://',
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+          },
         },
       });
 
@@ -49,40 +69,68 @@ export default function SignUp() {
 
   return (
     <Background>
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.container}>
-          <View style={styles.header}>
-            <Text style={styles.title}>TIER 1</Text>
-            <Text style={styles.subtitle}>Create Account</Text>
-          </View>
-          <View style={styles.form}>
-            <TextInput
-              placeholder="Email"
-              placeholderTextColor="rgba(255, 255, 255, 0.5)"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              style={styles.input}
-            />
-            <TextInput
-              placeholder="Password"
-              placeholderTextColor="rgba(255, 255, 255, 0.5)"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              style={styles.input}
-            />
-            <GradientButton
-              title={loading ? 'Creating account...' : 'Sign Up'}
-              onPress={loading ? undefined : handleSignUp}
-            />
-            <TouchableOpacity onPress={() => router.push('../SignIn')}>
-              <Text style={styles.link}>Already have an account? Sign In</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </SafeAreaView>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+          >
+            <SafeAreaView style={styles.safeArea}>
+              <View style={styles.container}>
+                <View style={styles.header}>
+                  <Text style={styles.title}>TIER 1</Text>
+                  <Text style={styles.subtitle}>Create Account</Text>
+                </View>
+                <View style={styles.form}>
+                  <TextInput
+                    placeholder="First Name"
+                    placeholderTextColor="rgba(255, 255, 255, 0.5)"
+                    value={firstName}
+                    onChangeText={setFirstName}
+                    autoCapitalize="words"
+                    style={styles.input}
+                  />
+                  <TextInput
+                    placeholder="Last Name"
+                    placeholderTextColor="rgba(255, 255, 255, 0.5)"
+                    value={lastName}
+                    onChangeText={setLastName}
+                    autoCapitalize="words"
+                    style={styles.input}
+                  />
+                  <TextInput
+                    placeholder="Email"
+                    placeholderTextColor="rgba(255, 255, 255, 0.5)"
+                    value={email}
+                    onChangeText={setEmail}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                    style={styles.input}
+                  />
+                  <TextInput
+                    placeholder="Password"
+                    placeholderTextColor="rgba(255, 255, 255, 0.5)"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                    style={styles.input}
+                  />
+                  <GradientButton
+                    title={loading ? 'Creating account...' : 'Sign Up'}
+                    onPress={loading ? undefined : handleSignUp}
+                  />
+                  <TouchableOpacity onPress={() => router.push('../SignIn')}>
+                    <Text style={styles.link}>Already have an account? Sign In</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </SafeAreaView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
     </Background>
   );
 }
@@ -90,6 +138,9 @@ export default function SignUp() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   container: {
     flex: 1,

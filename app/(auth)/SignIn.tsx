@@ -2,7 +2,21 @@ import { Background } from '@/components/ui/Background';
 import { GradientButton } from '@/components/ui/GradientButton';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Dimensions, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  Dimensions,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import { supabase } from '../../lib/supabase';
 
 const windowHeight = Dimensions.get('window').height;
@@ -19,20 +33,13 @@ export default function SignIn() {
   const handleSignIn = async () => {
     try {
       setLoading(true);
-      console.log('Attempting sign in with:', { email });
-      
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      console.log('Sign in response:', { data, error });
-
       if (error) {
-        console.error('Sign in error:', error);
         Alert.alert('Sign in error', error.message);
       } else {
-        console.log('Sign in successful:', data);
         router.replace('/(tabs)');
       }
     } catch (err) {
-      console.error('Unexpected error during sign in:', err);
       Alert.alert('Error', 'An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
@@ -41,41 +48,49 @@ export default function SignIn() {
 
   return (
     <Background>
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.container}>
-          <View style={styles.header}>
-            <Text style={styles.title}>TIER 1</Text>
-            <Text style={styles.subtitle}>Sign In</Text>
-          </View>
-
-          <View style={styles.form}>
-            <TextInput
-              placeholder="Email"
-              placeholderTextColor="rgba(255, 255, 255, 0.5)"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              style={styles.input}
-            />
-            <TextInput
-              placeholder="Password"
-              placeholderTextColor="rgba(255, 255, 255, 0.5)"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              style={styles.input}
-            />
-            <GradientButton
-              title={loading ? 'Signing in...' : 'Sign In'}
-              onPress={loading ? undefined : handleSignIn}
-            />
-            <TouchableOpacity onPress={() => router.push('../SignUp')}>
-              <Text style={styles.link}>Don't have an account? Sign Up</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </SafeAreaView>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+          <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+            <SafeAreaView style={styles.safeArea}>
+              <View style={styles.container}>
+                <View style={styles.header}>
+                  <Text style={styles.title}>TIER 1</Text>
+                  <Text style={styles.subtitle}>Sign In</Text>
+                </View>
+                <View style={styles.form}>
+                  <TextInput
+                    placeholder="Email"
+                    placeholderTextColor="rgba(255, 255, 255, 0.5)"
+                    value={email}
+                    onChangeText={setEmail}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                    style={styles.input}
+                  />
+                  <TextInput
+                    placeholder="Password"
+                    placeholderTextColor="rgba(255, 255, 255, 0.5)"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                    style={styles.input}
+                  />
+                  <GradientButton
+                    title={loading ? 'Signing in...' : 'Sign In'}
+                    onPress={loading ? undefined : handleSignIn}
+                  />
+                  <TouchableOpacity onPress={() => router.push('../SignUp')}>
+                    <Text style={styles.link}>Don't have an account? Sign Up</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </SafeAreaView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
     </Background>
   );
 }

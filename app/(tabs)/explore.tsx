@@ -1,9 +1,9 @@
 import { Background } from '@/components/ui/Background';
 import { CollectionCard } from '@/components/ui/CollectionCard';
-import { SwitchCard } from '@/components/ui/SwitchCard';
+import { getThemeConfig } from '@/constants/ThemeColors';
 import { useCourses } from '@/src/hooks/useCourses';
 import { useRouter } from 'expo-router';
-import { Lightning, Moon, Trophy, WaveSawtooth } from 'phosphor-react-native';
+import { Lock } from 'phosphor-react-native';
 import React from 'react';
 import { Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -19,17 +19,25 @@ const switchCardShadow = {
   elevation: 4,
 };
 
-const courseMeta: Record<string, { icon: React.ComponentType<any>; color: string[] }> = {
-  'Emotional Control': { icon: Lightning, color: ['#2a9d8f', '#1a6b61'] },
-  'Focus': { icon: Lightning, color: ['#2a9d8f', '#1a6b61'] },
-  'Sleep': { icon: Moon, color: ['#6c757d', '#495057'] },
-  'Performance': { icon: Trophy, color: ['#e9c46a', '#a17e3d'] },
-  'Recovery': { icon: WaveSawtooth, color: ['#457b9d', '#2c4a63'] },
-};
-
 export default function ExploreScreen() {
   const router = useRouter();
   const { courses, loading, error } = useCourses();
+
+  // Group courses by theme
+  const groupedCourses = courses.reduce((acc, course) => {
+    const themeName = course.theme?.name || 'default';
+    console.log('🎨 Course:', course.title, 'Theme ID:', course.theme_id, 'Theme Name:', course.theme?.name, 'Display:', course.theme?.display_name);
+    if (!acc[themeName]) {
+      acc[themeName] = {
+        theme: course.theme,
+        courses: []
+      };
+    }
+    acc[themeName].courses.push(course);
+    return acc;
+  }, {} as Record<string, { theme: any; courses: any[] }>);
+
+  console.log('📊 Grouped courses by theme name:', Object.keys(groupedCourses));
 
   return (
     <Background>
@@ -42,45 +50,64 @@ export default function ExploreScreen() {
           <View style={[styles.header, { paddingTop: rem(2.5) }]}>
             <View>
               <Text style={styles.title}>Explore</Text>
-              <Text style={styles.subtitle}>Categories</Text>
             </View>
           </View>
 
-          <Text style={styles.sectionTitle}>Quick Switches</Text>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 32 }}>
-            <SwitchCard icon={Lightning} title="Switch On" color={['#2a9d8f']} style={switchCardShadow} />
-            <SwitchCard icon={Moon} title="Switch Off" color={['#6c757d']} style={switchCardShadow} />
-            <SwitchCard icon={Trophy} title="Take Control" color={['#e9c46a']} style={switchCardShadow} />
-          </View>
-
-          <Text style={styles.sectionTitle}>Training</Text>
-          <View style={{ gap: 16 }}>
+          <View style={{ gap: 20 }}>
             {loading && <Text style={{ color: '#aaa' }}>Loading...</Text>}
             {error && <Text style={{ color: 'red' }}>{error}</Text>}
-            {courses.map(course => {
-              const meta = courseMeta[course.title] ?? { icon: Lightning, color: ['#999', '#666'] };
+            {Object.entries(groupedCourses).map(([themeName, themeData]) => {
+              const themeConfig = getThemeConfig(themeName);
+              console.log('🎨 Theme config for', themeName, ':', themeConfig);
+              console.log('🎨 Theme colors:', themeConfig.colors);
               return (
-                <TouchableOpacity
-                  key={course.id}
-                  onPress={() =>
-                    router.push({
-                      pathname: '/collection',
-                      params: {
-                        courseId: course.id,
-                        title: course.title,
-                      },
-                    })
-                  }
-                >
-                  <CollectionCard
-                    title={course.title}
-                    sessions={course.sessionCount ?? 0}
-                    icon={meta.icon}
-                    color={meta.color}
-                    fullWidth
-                    hideIcon
-                  />
-                </TouchableOpacity>
+                <View key={themeName} style={styles.themeSection}>
+                  <View style={styles.themeHeader}>
+                    <themeConfig.icon size={24} color="#fff" weight="light" />
+                    <Text style={styles.themeTitle}>
+                      {themeData.theme?.display_name || themeName}
+                    </Text>
+                  </View>
+                  <View style={styles.coursesContainer}>
+                    {themeData.courses.map(course => {
+                      const isDisabled = !!course.disabled;
+                      console.log('🎨 Course card colors for', course.title, ':', themeConfig.colors);
+                      return (
+                        <View key={course.id} style={{ position: 'relative' }}>
+                          <TouchableOpacity
+                            activeOpacity={isDisabled ? 1 : 0.7}
+                            onPress={() => {
+                              if (!isDisabled) {
+                                router.push({
+                                  pathname: '/collection',
+                                  params: {
+                                    courseId: course.id,
+                                    title: course.title,
+                                  },
+                                });
+                              }
+                            }}
+                            disabled={isDisabled}
+                          >
+                            <CollectionCard
+                              title={course.title}
+                              sessions={course.sessionCount ?? 0}
+                              color={themeConfig.colors}
+                              hideIcon
+                              fullWidth
+                              disabled={isDisabled}
+                            />
+                            {isDisabled && (
+                              <View style={styles.disabledOverlay}>
+                                <Lock size={32} color="#fff" weight="bold" />
+                              </View>
+                            )}
+                          </TouchableOpacity>
+                        </View>
+                      );
+                    })}
+                  </View>
+                </View>
               );
             })}
           </View>
@@ -93,12 +120,12 @@ export default function ExploreScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: '#000',
   },
   container: {
     flex: 1,
     padding: 17,
-    backgroundColor: 'transparent',
+    backgroundColor: '#000',
   },
   header: {
     flexDirection: 'row',
@@ -123,5 +150,31 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay-Bold',
     marginBottom: 10,
     marginTop: 8,
+  },
+  disabledOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    zIndex: 2,
+  },
+  themeSection: {
+    marginBottom: 32,
+  },
+  themeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 12,
+  },
+  themeTitle: {
+    fontSize: 22,
+    fontFamily: 'SFProDisplay-Bold',
+    fontWeight: '600',
+    color: '#fff',
+  },
+  coursesContainer: {
+    gap: 16,
   },
 });

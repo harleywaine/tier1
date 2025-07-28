@@ -5,12 +5,12 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft } from 'phosphor-react-native';
 import React from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
 export default function CollectionScreen() {
@@ -33,6 +33,7 @@ export default function CollectionScreen() {
       title: session.title,
       author: session.author || 'Unknown',
       imageUrl: session.image_url || '',
+      sessionId: session.id,
     };
 
     console.log('🟢 Navigating to /play with params:', params);

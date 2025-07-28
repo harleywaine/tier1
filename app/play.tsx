@@ -1,22 +1,28 @@
 import { Background } from '@/components/ui/Background';
 import { useAudioPlayer } from '@/src/hooks/useAudioPlayer';
+import { useFavorites } from '@/src/hooks/useFavorites';
 import Slider from '@react-native-community/slider';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import LottieView from 'lottie-react-native';
-import { ArrowLeft, Pause, Play, SkipBack, SkipForward } from 'phosphor-react-native';
+import { ArrowLeft, Heart, Pause, Play, SkipBack, SkipForward } from 'phosphor-react-native';
 import React, { useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function PlayScreen() {
   const router = useRouter();
+  const { isFavorited, toggleFavorite } = useFavorites();
   const params = useLocalSearchParams<{
     audioUrl: string;
     title?: string;
     author?: string;
+    sessionId?: string;
   }>();
   const audioUrl = decodeURIComponent(params.audioUrl);
   const title = params.title || 'Session';
   const author = params.author || 'Glenn Harrold';
+  const sessionId = params.sessionId;
+  console.log('🎵 Play page sessionId:', sessionId);
+  console.log('🎵 Play page isFavorited:', sessionId ? isFavorited(sessionId) : 'No sessionId');
 
   const { status, isLoading, error, play, pause, seekTo } = useAudioPlayer(audioUrl);
 
@@ -49,6 +55,19 @@ export default function PlayScreen() {
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
             <ArrowLeft color="#e0f6ff" size={26} weight="light" />
           </TouchableOpacity>
+
+          {sessionId && (
+            <TouchableOpacity
+              style={styles.favoriteButton}
+              onPress={() => toggleFavorite(sessionId)}
+            >
+              <Heart
+                size={26}
+                color="#e0f6ff"
+                weight={isFavorited(sessionId) ? "fill" : "light"}
+              />
+            </TouchableOpacity>
+          )}
 
           <View style={styles.lottieInfoWrapper}>
             <View style={styles.imageCard}>
@@ -134,6 +153,21 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 32,
     left: 20,
+    zIndex: 10,
+    backgroundColor: 'rgba(20, 24, 32, 0.7)',
+    borderRadius: 20,
+    padding: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  favoriteButton: {
+    position: 'absolute',
+    top: 32,
+    right: 20,
     zIndex: 10,
     backgroundColor: 'rgba(20, 24, 32, 0.7)',
     borderRadius: 20,

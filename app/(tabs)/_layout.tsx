@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Compass, House, User } from 'phosphor-react-native';
+import { Compass, Heart, House, User } from 'phosphor-react-native';
 import React from 'react';
 import { Platform, View } from 'react-native';
 
@@ -38,22 +38,21 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => (
-            <View style={{ marginTop: -6 }}>
-              <House size={28} color={color} weight="light" />
-            </View>
-          ),
+          tabBarIcon: ({ color }) => <House size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="explore"
         options={{
           title: 'Explore',
-          tabBarIcon: ({ color }) => (
-            <View style={{ marginTop: -6 }}>
-              <Compass size={28} color={color} weight="light" />
-            </View>
-          ),
+          tabBarIcon: ({ color }) => <Compass size={24} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="favorites"
+        options={{
+          title: 'Favorites',
+          tabBarIcon: ({ color }) => <Heart size={24} color={color} />,
         }}
       />
       <Tabs.Screen
