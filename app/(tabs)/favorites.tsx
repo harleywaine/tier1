@@ -1,128 +1,55 @@
 import { Background } from '@/components/ui/Background';
 import { SessionCard } from '@/components/ui/SessionCard';
+import { SessionCardSkeleton } from '@/components/ui/SkeletonCards';
 import { useFavorites } from '@/src/hooks/useFavorites';
 import { useSessionCompletion } from '@/src/hooks/useSessionCompletion';
 import { useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
-import { Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { supabase } from '../../lib/supabase';
+import { Heart } from 'phosphor-react-native';
+import React, { useMemo } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-const windowHeight = Dimensions.get('window').height;
 const baseFontSize = 16;
 const rem = (size: number) => size * baseFontSize;
 
-interface Session {
-  id: string;
-  title: string;
-  audio_url: string;
-  author?: string;
-  image_url?: string;
-  course_id: string;
-  course_title?: string;
-}
-
 export default function FavoritesScreen() {
   const router = useRouter();
-  const { favorites, loading, error } = useFavorites();
-  const [sessions, setSessions] = useState<Session[]>([]);
-  const [sessionsLoading, setSessionsLoading] = useState(true);
+  const { favorites, loading: favoritesLoading } = useFavorites();
 
   // Get session IDs for completion tracking
-  const sessionIds = useMemo(() => sessions.map(s => s.id), [sessions]);
-  const { getSessionCompletion } = useSessionCompletion(sessionIds);
-
-  useEffect(() => {
-    const fetchSessions = async () => {
-      if (favorites.length === 0) {
-        setSessions([]);
-        setSessionsLoading(false);
-        return;
-      }
-
-      try {
-        const sessionIds = favorites.map(fav => fav.session_id);
-        console.log('🔍 Fetching sessions for favorites:', sessionIds);
-        
-        // Fetch from both basic_training_sessions and maintenance_sessions
-        const [basicResult, maintenanceResult] = await Promise.all([
-          supabase.from('basic_training_sessions').select('*').in('id', sessionIds),
-          supabase.from('maintenance_sessions').select('*').in('id', sessionIds)
-        ]);
-
-        console.log('📊 Basic sessions result:', basicResult);
-        console.log('📊 Maintenance sessions result:', maintenanceResult);
-
-        const allSessions = [
-          ...(basicResult.data || []),
-          ...(maintenanceResult.data || [])
-        ];
-
-        console.log('🎯 All sessions found:', allSessions.length);
-        console.log('🎯 Session IDs found:', allSessions.map(s => s.id));
-
-        // Fetch course titles for all sessions
-        const courseIds = [...new Set(allSessions.map(session => session.course_id))];
-        const { data: coursesData } = await supabase
-          .from('courses')
-          .select('id, title')
-          .in('id', courseIds);
-
-        const coursesMap = new Map(coursesData?.map(course => [course.id, course.title]) || []);
-
-        // Add course titles to sessions
-        const sessionsWithCourses = allSessions.map(session => ({
-          ...session,
-          course_title: coursesMap.get(session.course_id) || 'Unknown Course'
-        }));
-
-        setSessions(sessionsWithCourses);
-      } catch (err) {
-        console.error('Error fetching sessions:', err);
-      } finally {
-        setSessionsLoading(false);
-      }
-    };
-
-    fetchSessions();
+  const sessionIds = useMemo(() => {
+    const ids = favorites.map(fav => fav.session_id);
+    return ids;
   }, [favorites]);
 
-  const handleSessionPress = (session: Session) => {
-    if (!session.audio_url) {
-      console.warn('No audio URL for session:', session.title);
-      return;
-    }
+  const { getSessionCompletion } = useSessionCompletion(sessionIds);
 
-    const encodedUrl = encodeURI(session.audio_url);
-    const params = {
-      audioUrl: encodedUrl,
-      title: session.title,
-      author: session.course_title || 'Unknown',
-      imageUrl: session.image_url || '',
-      sessionId: session.id,
-    };
+  // Check if data is loading
+  const isLoading = favoritesLoading;
 
+  // Skeleton arrays for loading states
+  const sessionSkeletons = Array(6).fill(null);
+
+  console.log('🔍 Favorites screen state:', { isLoading, favoritesCount: favorites.length, favorites });
+
+  const handleSessionPress = (session: any) => {
+    const encodedUrl = encodeURIComponent(session.audio_url);
     router.push({
       pathname: '/play',
-      params,
+      params: {
+        audioUrl: encodedUrl,
+        title: session.title,
+        author: session.course_title || 'Unknown',
+        imageUrl: '',
+        sessionId: session.id,
+      },
     });
   };
-
-  if (loading || sessionsLoading) {
-    return (
-      <Background>
-        <SafeAreaView style={styles.safeArea}>
-          <View style={styles.container}>
-            <Text style={styles.loadingText}>Loading favorites...</Text>
-          </View>
-        </SafeAreaView>
-      </Background>
-    );
-  }
 
   return (
     <Background>
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.container}>
+        <ScrollView style={styles.container} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
           <View style={[styles.header, { paddingTop: rem(2.5) }]}>
             <View>
               <Text style={styles.title}>Favorites</Text>
@@ -130,35 +57,49 @@ export default function FavoritesScreen() {
             </View>
           </View>
 
-          <ScrollView 
-            style={styles.content}
-            contentContainerStyle={{ paddingBottom: rem(4) }}
-            showsVerticalScrollIndicator={false}
-          >
-            {error && <Text style={styles.errorText}>{error}</Text>}
-            
-            {sessions.length === 0 ? (
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyText}>No favorites yet</Text>
-                <Text style={styles.emptySubtext}>Tap the heart icon while listening to save sessions</Text>
-              </View>
-            ) : (
+          {isLoading && favorites.length === 0 ? (
+            // Show skeleton loading states only if we don't have any favorites yet
+            <>
+              {/* Sessions skeleton */}
               <View style={styles.sessionsContainer}>
-                {sessions.map(session => (
-                  <SessionCard
-                    key={session.id}
-                    title={session.title}
-                    subtitle={session.course_title}
-                    compact
-                    showBookmark
-                    onPress={() => handleSessionPress(session)}
-                    completionStatus={getSessionCompletion(session.id).status}
-                  />
+                {sessionSkeletons.map((_, index) => (
+                  <View key={index} style={{ marginBottom: 12 }}>
+                    <SessionCardSkeleton />
+                  </View>
                 ))}
               </View>
-            )}
-          </ScrollView>
-        </View>
+            </>
+          ) : favorites.length > 0 ? (
+            // Show actual content
+            <View style={styles.sessionsContainer}>
+              {favorites.map((favorite) => {
+                const completion = getSessionCompletion(favorite.session_id);
+                
+                return (
+                  <TouchableOpacity
+                    key={favorite.id}
+                    onPress={() => handleSessionPress(favorite)}
+                  >
+                    <SessionCard
+                      title={favorite.title}
+                      subtitle={favorite.course_title}
+                      completionStatus={completion.status}
+                    />
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          ) : (
+            // Show empty state
+            <View style={styles.emptyState}>
+              <Heart size={64} color="#666" weight="light" />
+              <Text style={styles.emptyTitle}>No favorites yet</Text>
+              <Text style={styles.emptySubtitle}>
+                Tap the heart icon when playing a session to add it to your favourites
+              </Text>
+            </View>
+          )}
+        </ScrollView>
       </SafeAreaView>
     </Background>
   );
@@ -191,23 +132,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontFamily: 'SFProDisplay-Light',
   },
-  content: {
-    flex: 1,
-  },
   sessionsContainer: {
-    gap: 14,
-  },
-  loadingText: {
-    color: '#fff',
-    fontSize: 16,
-    textAlign: 'center',
-    marginTop: 20,
-  },
-  errorText: {
-    color: 'red',
-    fontSize: 16,
-    textAlign: 'center',
-    marginTop: 20,
+    gap: 16,
   },
   emptyState: {
     flex: 1,
@@ -215,17 +141,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 60,
   },
-  emptyText: {
+  emptyTitle: {
     color: '#fff',
     fontSize: 20,
     fontFamily: 'SFProDisplay-Bold',
     marginBottom: 8,
   },
-  emptySubtext: {
+  emptySubtitle: {
     color: '#aaa',
     fontSize: 16,
-    fontFamily: 'SFProDisplay-Light',
     textAlign: 'center',
-    paddingHorizontal: 40,
+    paddingHorizontal: 20,
   },
 }); 

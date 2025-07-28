@@ -1,43 +1,42 @@
 import { Background } from '@/components/ui/Background';
 import { SessionCard } from '@/components/ui/SessionCard';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { SessionCardSkeleton } from '@/components/ui/SkeletonCards';
+import { useCourses } from '@/src/hooks/useCourses';
 import { useSessionCompletion } from '@/src/hooks/useSessionCompletion';
 import { useSessionsByCourseTitle } from '@/src/hooks/useSessionsByCourseTitle';
 import { useIsFocused } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft } from 'phosphor-react-native';
 import React, { useEffect, useMemo } from 'react';
-import {
-    ImageBackground,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
-} from 'react-native';
+import { ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function CollectionScreen() {
-  const { title } = useLocalSearchParams<{ title: string }>();
   const router = useRouter();
+  const { courseId, title } = useLocalSearchParams<{ courseId: string; title: string }>();
   const isFocused = useIsFocused();
   
-  console.log('🔍 Collection page title parameter:', title);
-
-  const { course, maintenance, basic, loading, error } = useSessionsByCourseTitle(title);
+  const { courses, loading: coursesLoading } = useCourses();
+  const { course: courseData, maintenance, basic, loading: sessionsLoading } = useSessionsByCourseTitle(title || '');
   
-  console.log('🔍 Course data:', course);
-  console.log('🔍 Course title from data:', course?.title);
+  // Get course data
+  const course = useMemo(() => {
+    return courses.find(c => c.id === courseId || c.title === title);
+  }, [courses, courseId, title]);
 
-  // Get all session IDs for completion tracking
+  // Combine all sessions
+  const allSessions = useMemo(() => {
+    return [...maintenance, ...basic];
+  }, [maintenance, basic]);
+
+  // Get session IDs for completion tracking
   const allSessionIds = useMemo(() => {
-    const ids = [
-      ...maintenance.map(s => s.id),
-      ...basic.map(s => s.id)
-    ];
+    const ids = allSessions.map((session: any) => session.id);
     console.log('🔍 Session IDs for completion tracking:', ids);
     return ids;
-  }, [maintenance, basic]);
-  
+  }, [allSessions]);
+
   const { getSessionCompletion, refresh } = useSessionCompletion(allSessionIds);
 
   // Refresh completion data when screen comes into focus
@@ -49,100 +48,134 @@ export default function CollectionScreen() {
     }
   }, [isFocused, refresh]);
 
+  // Check if data is loading
+  const isLoading = coursesLoading || sessionsLoading;
+
+  // Skeleton arrays for loading states
+  const sessionSkeletons = Array(8).fill(null);
+
+  console.log('🔍 Collection page title parameter:', title);
+  console.log('🔍 Course data:', course);
+  console.log('🔍 Course title from data:', course?.title);
+
   const handlePress = (session: any) => {
     console.log('🟡 Tapped session:', session);
-
-    if (!session.audio_url) {
-      console.warn('❌ No audio URL for session:', session.title);
-      return;
-    }
-
-    const encodedUrl = encodeURI(session.audio_url);
+    const encodedUrl = encodeURIComponent(session.audio_url);
     const params = {
       audioUrl: encodedUrl,
       title: session.title,
       author: course?.title || title || 'Unknown',
-      imageUrl: session.image_url || '',
+      imageUrl: '',
       sessionId: session.id,
     };
-
     console.log('🟢 Navigating to /play with params:', params);
     console.log('🟢 Course title being passed as author:', course?.title || title);
-
     router.push({
       pathname: '/play',
       params,
     });
   };
 
+  // Separate basic training and maintenance sessions
+  const basicTrainingSessions = allSessions.filter((s: any) => s.position && s.position <= 10).sort((a: any, b: any) => (a.position || 0) - (b.position || 0));
+  const maintenanceSessions = allSessions.filter((s: any) => s.position && s.position > 10).sort((a: any, b: any) => (a.position || 0) - (b.position || 0));
+
   return (
     <Background>
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <ArrowLeft color="#e0f6ff" size={26} weight="light" />
+        <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+          {/* Hero Section */}
+          <ImageBackground
+            source={require('@/assets/images/Index-bg.jpg')}
+            style={styles.heroSection}
+            imageStyle={{ opacity: 0.5 }}
+          >
+            <View style={styles.heroContent}>
+              <Text style={styles.heroTitle}>{title}</Text>
+            </View>
+          </ImageBackground>
+
+          {/* Back Button */}
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <ArrowLeft size={24} color="#fff" weight="bold" />
           </TouchableOpacity>
 
-          <View style={styles.heroContainer}>
-            <ImageBackground
-              source={require('@/assets/images/Index-bg.jpg')}
-              style={styles.heroBackground}
-              imageStyle={styles.heroImage}
-            >
-              <View style={styles.heroOverlay}>
-                <Text style={styles.heroTitle}>{title}</Text>
-                <Text style={styles.heroDescription}>
-                  {course?.description ?? 'Explore the sessions in this course.'}
-                </Text>
-              </View>
-            </ImageBackground>
-          </View>
-
-          {error && <Text style={{ color: 'red' }}>Error: {error}</Text>}
-
-          {maintenance.length > 0 && (
+          {isLoading ? (
+            // Show skeleton loading states
             <>
-              <Text style={styles.sectionTitle}>Maintenance</Text>
+              {/* Section title skeleton */}
+              <View style={styles.sectionTitle}>
+                <Skeleton width="60%" height={24} borderRadius={4} />
+              </View>
+              
+              {/* Sessions skeleton */}
               <View style={styles.sessionsContainer}>
-                {maintenance.map(session => {
-                  const completion = getSessionCompletion(session.id);
-                  console.log(`🔍 Session ${session.title}: ${completion.status}`);
-                  console.log(`🔍 Session ${session.id} completion data:`, completion);
-                  return (
-                    <SessionCard
-                      key={session.id}
-                      title={session.title}
-                      subtitle="Maintenance session"
-                      compact
-                      showBookmark
-                      onPress={() => handlePress(session)}
-                      completionStatus={completion.status}
-                    />
-                  );
-                })}
+                {sessionSkeletons.map((_, index) => (
+                  <View key={index} style={{ marginBottom: 12 }}>
+                    <SessionCardSkeleton />
+                  </View>
+                ))}
               </View>
             </>
-          )}
+          ) : (
+            // Show actual content
+            <>
+              {/* Basic Training Section */}
+              {basicTrainingSessions.length > 0 && (
+                <>
+                  <Text style={styles.sectionTitle}>Basic Training</Text>
+                  <View style={styles.sessionsContainer}>
+                    {basicTrainingSessions.map((session: any) => {
+                      const completion = getSessionCompletion(session.id);
+                      console.log(`🔍 Session ${session.title}:`, completion.status);
+                      console.log(`🔍 Session ${session.id} completion data:`, completion);
+                      
+                      return (
+                        <TouchableOpacity
+                          key={session.id}
+                          onPress={() => handlePress(session)}
+                        >
+                          <SessionCard
+                            title={session.title}
+                            subtitle={`Lesson ${session.position}`}
+                            completionStatus={completion.status}
+                          />
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                </>
+              )}
 
-          <Text style={styles.sectionTitle}>Basic Training</Text>
-          <View style={styles.sessionsContainer}>
-            {basic.map(session => {
-              const completion = getSessionCompletion(session.id);
-              console.log(`🔍 Session ${session.title}: ${completion.status}`);
-              console.log(`🔍 Session ${session.id} completion data:`, completion);
-              return (
-                <SessionCard
-                  key={session.id}
-                  title={session.title}
-                  subtitle="Basic training session"
-                  compact
-                  showBookmark
-                  onPress={() => handlePress(session)}
-                  completionStatus={completion.status}
-                />
-              );
-            })}
-          </View>
+              {/* Maintenance Section */}
+              {maintenanceSessions.length > 0 && (
+                <>
+                  <Text style={styles.sectionTitle}>Maintenance</Text>
+                  <View style={styles.sessionsContainer}>
+                    {maintenanceSessions.map((session: any) => {
+                      const completion = getSessionCompletion(session.id);
+                      
+                      return (
+                        <TouchableOpacity
+                          key={session.id}
+                          onPress={() => handlePress(session)}
+                        >
+                          <SessionCard
+                            title={session.title}
+                            subtitle={`Lesson ${session.position}`}
+                            completionStatus={completion.status}
+                          />
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                </>
+              )}
+            </>
+          )}
         </ScrollView>
       </SafeAreaView>
     </Background>
@@ -171,7 +204,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
   },
-  heroContainer: {
+  heroSection: {
     width: '100%',
     height: 200,
     marginBottom: 20,
@@ -181,16 +214,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'transparent',
   },
-  heroBackground: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-    borderRadius: 0,
-  },
-  heroImage: {
-    borderRadius: 0,
-  },
-  heroOverlay: {
+  heroContent: {
     position: 'absolute',
     top: 0,
     left: 0,

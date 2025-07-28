@@ -1,6 +1,8 @@
 import { ArcCard } from '@/components/ui/ArcCard';
 import { CollectionCard } from '@/components/ui/CollectionCard';
 import { GradientButton } from '@/components/ui/GradientButton';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { ArcCardSkeleton, SwitchCardSkeleton } from '@/components/ui/SkeletonCards';
 import { SwitchCard } from '@/components/ui/SwitchCard';
 import { useArcs } from '@/src/hooks/useArcs';
 import { useCourses } from '@/src/hooks/useCourses';
@@ -31,6 +33,13 @@ export default function HomeScreen() {
     };
     fetchUser();
   }, []);
+
+  // Check if any critical data is still loading
+  const isLoading = arcsLoading || historyLoading || coursesLoading;
+
+  // Skeleton arrays for loading states
+  const arcSkeletons = Array(8).fill(null);
+  const switchSkeletons = Array(4).fill(null);
 
   // Define the order of arcs
   const arcOrder = ['commit', 'condition', 'control', 'reset', 'prime', 'explore', 'optimise', 'repeat'];
@@ -202,8 +211,29 @@ export default function HomeScreen() {
         </View>
 
         {/* Arcs Section */}
-        {arcsLoading ? (
-          <Text style={{ color: '#fff', marginTop: 20 }}>Loading arcs...</Text>
+        {isLoading ? (
+          // Show skeleton loading states
+          <>
+            {/* Header skeleton */}
+            <View style={styles.header}>
+              <Skeleton width="60%" height={32} borderRadius={4} />
+              <Skeleton width="40%" height={20} borderRadius={4} style={{ marginTop: 8 }} />
+            </View>
+            
+            {/* Switches skeleton */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20, gap: 8 }}>
+              {switchSkeletons.map((_, index) => (
+                <SwitchCardSkeleton key={index} />
+              ))}
+            </View>
+            
+            {/* Arcs skeletons */}
+            {arcSkeletons.map((_, index) => (
+              <View key={index} style={{ marginTop: 16 }}>
+                <ArcCardSkeleton />
+              </View>
+            ))}
+          </>
         ) : sortedArcs.length > 0 ? (
           sortedArcs.map((arc) => (
             arc && (
@@ -238,7 +268,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontFamily: 'SFProDisplay-Bold',
+    fontFamily: 'SFProDisplay-Regular',
     color: '#fff',
   },
   subtitle: {

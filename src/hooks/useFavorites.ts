@@ -6,6 +6,9 @@ export interface Favorite {
   user_id: string;
   session_id: string;
   created_at: string;
+  title?: string;
+  course_title?: string;
+  audio_url?: string;
 }
 
 export function useFavorites() {
@@ -21,15 +24,36 @@ export function useFavorites() {
 
       const { data, error } = await supabase
         .from('favorites')
-        .select('*')
+        .select(`
+          *,
+          sessions (
+            title,
+            audio_url,
+            courses (
+              title
+            )
+          )
+        `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       console.log('❤️ Favorites query result:', { data, error });
 
       if (error) throw error;
-      setFavorites(data || []);
-      console.log('💾 Favorites set:', data?.length || 0);
+      
+      // Transform the data to flatten the nested structure
+      const transformedFavorites = (data || []).map(fav => ({
+        id: fav.id,
+        user_id: fav.user_id,
+        session_id: fav.session_id,
+        created_at: fav.created_at,
+        title: fav.sessions?.title,
+        audio_url: fav.sessions?.audio_url,
+        course_title: fav.sessions?.courses?.title,
+      }));
+      
+      setFavorites(transformedFavorites);
+      console.log('💾 Favorites set:', transformedFavorites.length);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch favorites');
     } finally {
