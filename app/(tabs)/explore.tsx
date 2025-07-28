@@ -63,7 +63,6 @@ export default function ExploreScreen() {
               return (
                 <View key={themeName} style={styles.themeSection}>
                   <View style={styles.themeHeader}>
-                    <themeConfig.icon size={24} color="#fff" weight="light" />
                     <Text style={styles.themeTitle}>
                       {themeData.theme?.display_name || themeName}
                     </Text>

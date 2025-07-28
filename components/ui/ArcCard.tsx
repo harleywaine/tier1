@@ -7,12 +7,13 @@ interface ArcCardProps {
   description: string;
   onPress?: () => void;
   children?: React.ReactNode;
+  style?: any;
 }
 
-export const ArcCard = ({ name, title, description, onPress, children }: ArcCardProps) => {
+export const ArcCard = ({ name, title, description, onPress, children, style }: ArcCardProps) => {
   return (
     <TouchableOpacity
-      style={styles.arcCard}
+      style={[styles.arcCard, style]}
       onPress={onPress}
       activeOpacity={0.7}
       disabled={!onPress}
@@ -32,7 +33,7 @@ export const ArcCard = ({ name, title, description, onPress, children }: ArcCard
 const styles = StyleSheet.create({
   arcCard: {
     backgroundColor: '#1a1a1a',
-    borderRadius: 20,
+    borderRadius: 8,
     padding: 20,
     marginBottom: 16,
     borderWidth: 1,

@@ -1,8 +1,9 @@
 import { Background } from '@/components/ui/Background';
 import { SessionCard } from '@/components/ui/SessionCard';
 import { useFavorites } from '@/src/hooks/useFavorites';
+import { useSessionCompletion } from '@/src/hooks/useSessionCompletion';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { supabase } from '../../lib/supabase';
 
@@ -25,6 +26,10 @@ export default function FavoritesScreen() {
   const { favorites, loading, error } = useFavorites();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
+
+  // Get session IDs for completion tracking
+  const sessionIds = useMemo(() => sessions.map(s => s.id), [sessions]);
+  const { getSessionCompletion } = useSessionCompletion(sessionIds);
 
   useEffect(() => {
     const fetchSessions = async () => {
@@ -147,6 +152,7 @@ export default function FavoritesScreen() {
                     compact
                     showBookmark
                     onPress={() => handleSessionPress(session)}
+                    completionStatus={getSessionCompletion(session.id).status}
                   />
                 ))}
               </View>

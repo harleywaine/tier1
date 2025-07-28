@@ -4,6 +4,7 @@ import { GradientButton } from '@/components/ui/GradientButton';
 import { SwitchCard } from '@/components/ui/SwitchCard';
 import { useArcs } from '@/src/hooks/useArcs';
 import { useCourses } from '@/src/hooks/useCourses';
+import { useUserPlayHistory } from '@/src/hooks/useUserPlayHistory';
 import { useRouter } from 'expo-router';
 import { Lightning, Moon, Trophy, UserCircle } from 'phosphor-react-native';
 import React, { useEffect, useState } from 'react';
@@ -20,6 +21,7 @@ export default function HomeScreen() {
   const [firstName, setFirstName] = useState<string>('');
   const { arcs, loading: arcsLoading } = useArcs();
   const { courses, loading: coursesLoading } = useCourses();
+  const { lastPlayedSession, loading: historyLoading } = useUserPlayHistory();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -54,10 +56,59 @@ export default function HomeScreen() {
             description={arc.description}
           >
             <GradientButton
-              title="Button"
-              onPress={() => router.push('/explore')}
+              title={historyLoading ? "Loading..." : (lastPlayedSession ? "Continue" : "Get Started")}
+              onPress={() => {
+                if (lastPlayedSession) {
+                  // Navigate to the last played session
+                  const encodedUrl = encodeURIComponent(lastPlayedSession.audio_url);
+                  router.push({
+                    pathname: '/play',
+                    params: {
+                      audioUrl: encodedUrl,
+                      title: lastPlayedSession.title,
+                      author: 'Unknown',
+                      imageUrl: '',
+                      sessionId: lastPlayedSession.session_id,
+                    },
+                  });
+                } else {
+                  // Navigate to explore page
+                  router.push('/explore');
+                }
+              }}
               style={{ marginTop: 16 }}
             />
+          </ArcCard>
+        );
+      
+      case 'condition':
+        return (
+          <ArcCard
+            name={arc.name}
+            title={arc.title}
+            description={arc.description}
+            onPress={() => {
+              // Navigate to ECT protocol collection
+              router.push({
+                pathname: '/collection',
+                params: { courseId: 'ect-protocol-course-id', title: 'ECT Protocol' },
+              });
+            }}
+          />
+        );
+      
+      case 'control':
+        return (
+          <ArcCard
+            name={arc.name}
+            title={arc.title}
+            description={arc.description}
+          >
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 16, gap: 8 }}>
+              <SwitchCard icon={Lightning} title="" color={['#2a9d8f']} />
+              <SwitchCard icon={Moon} title="" color={['#6c757d']} />
+              <SwitchCard icon={Trophy} title="" color={['#e9c46a']} />
+            </View>
           </ArcCard>
         );
       
@@ -68,6 +119,7 @@ export default function HomeScreen() {
             name={arc.name}
             title={arc.title}
             description={arc.description}
+            style={{ paddingRight: 0 }}
           >
             <FlatList
               data={exploreCourses}
@@ -89,6 +141,7 @@ export default function HomeScreen() {
                       title={item.title}
                       sessions={item.sessionCount ?? 0}
                       fullWidth
+                      hideIcon
                     />
                   </TouchableOpacity>
                 </View>
@@ -107,6 +160,22 @@ export default function HomeScreen() {
           </ArcCard>
         );
       
+      case 'prime':
+        return (
+          <ArcCard
+            name={arc.name}
+            title={arc.title}
+            description={arc.description}
+            onPress={() => {
+              // Navigate to primers collection
+              router.push({
+                pathname: '/collection',
+                params: { courseId: 'primers-course-id', title: 'Primers' },
+              });
+            }}
+          />
+        );
+      
       default:
         return (
           <ArcCard
@@ -114,8 +183,8 @@ export default function HomeScreen() {
             title={arc.title}
             description={arc.description}
             onPress={() => {
-              // For now, just navigate to explore. We can customize this later
-              router.push('/explore');
+              // Navigate to favorites tab
+              router.push('/(tabs)/favorites');
             }}
           />
         );
@@ -137,13 +206,6 @@ export default function HomeScreen() {
             <Text style={styles.title}>{`You're back${firstName ? ', ' + firstName : ''}`}</Text>
             <Text style={styles.subtitle}>Let's train, win your day</Text>
           </View>
-        </View>
-
-        {/* Quick Switches Section */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 32 }}>
-          <SwitchCard icon={Lightning} title="Switch On" color={['#2a9d8f']} style={switchCardShadow} />
-          <SwitchCard icon={Moon} title="Switch Off" color={['#6c757d']} style={switchCardShadow} />
-          <SwitchCard icon={Trophy} title="Take Control" color={['#e9c46a']} style={switchCardShadow} />
         </View>
 
         {/* Arcs Section */}
@@ -202,7 +264,6 @@ const styles = StyleSheet.create({
   },
   horizontalList: {
     paddingLeft: 8,
-    paddingRight: 12,
     paddingVertical: 12,
     gap: 12,
   },
@@ -224,10 +285,3 @@ const styles = StyleSheet.create({
   },
 });
 
-const switchCardShadow = {
-  shadowColor: '#000',
-  shadowOpacity: 0.12,
-  shadowRadius: 8,
-  shadowOffset: { width: 0, height: 2 },
-  elevation: 4,
-};

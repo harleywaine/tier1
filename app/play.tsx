@@ -1,6 +1,7 @@
 import { Background } from '@/components/ui/Background';
 import { useAudioPlayer } from '@/src/hooks/useAudioPlayer';
 import { useFavorites } from '@/src/hooks/useFavorites';
+import { useUserPlayHistory } from '@/src/hooks/useUserPlayHistory';
 import Slider from '@react-native-community/slider';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import LottieView from 'lottie-react-native';
@@ -11,6 +12,7 @@ import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-na
 export default function PlayScreen() {
   const router = useRouter();
   const { isFavorited, toggleFavorite } = useFavorites();
+  const { recordSessionStart, updateSessionProgress } = useUserPlayHistory();
   const params = useLocalSearchParams<{
     audioUrl: string;
     title?: string;
@@ -32,6 +34,31 @@ export default function PlayScreen() {
 
   const [seeking, setSeeking] = useState(false);
   const [seekPos, setSeekPos] = useState(0);
+  const [hasRecordedStart, setHasRecordedStart] = useState(false);
+
+  // Record session start when audio begins playing
+  React.useEffect(() => {
+    if (sessionId && isPlaying && !hasRecordedStart) {
+      console.log('🎵 Recording session start for:', sessionId);
+      recordSessionStart(sessionId);
+      setHasRecordedStart(true);
+    }
+  }, [sessionId, isPlaying, hasRecordedStart, recordSessionStart]);
+
+  // Update progress every 15 seconds
+  React.useEffect(() => {
+    if (sessionId && duration > 0 && position > 0) {
+      const progressPercentage = Math.round((position / duration) * 100);
+      
+      // Update progress every 15 seconds or when reaching 100%
+      const shouldUpdate = progressPercentage % 15 === 0 || progressPercentage >= 100;
+      
+      if (shouldUpdate) {
+        console.log('🎵 Updating progress for session:', sessionId, 'Progress:', progressPercentage + '%');
+        updateSessionProgress(sessionId, progressPercentage);
+      }
+    }
+  }, [sessionId, duration, position, updateSessionProgress]);
 
   const onSeekStart = () => setSeeking(true);
   const onSeekComplete = (value: number) => {

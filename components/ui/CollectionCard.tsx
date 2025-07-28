@@ -12,9 +12,7 @@ interface CollectionCardProps {
 }
 
 export const CollectionCard = ({ icon: Icon, title, sessions, color, fullWidth, hideIcon, disabled }: CollectionCardProps) => {
-  console.log('🎨 CollectionCard received color prop:', color, 'for title:', title);
   const appliedColor = color && color.length > 0 ? color[0] : null;
-  console.log('🎨 Applied color:', appliedColor);
   
   return (
   <View style={[

@@ -1,16 +1,18 @@
 import { Background } from '@/components/ui/Background';
 import { SessionCard } from '@/components/ui/SessionCard';
+import { useSessionCompletion } from '@/src/hooks/useSessionCompletion';
 import { useSessionsByCourseTitle } from '@/src/hooks/useSessionsByCourseTitle';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft } from 'phosphor-react-native';
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
+    ImageBackground,
     SafeAreaView,
     ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 
 export default function CollectionScreen() {
@@ -18,6 +20,16 @@ export default function CollectionScreen() {
   const router = useRouter();
 
   const { course, maintenance, basic, loading, error } = useSessionsByCourseTitle(title);
+
+  // Get all session IDs for completion tracking
+  const allSessionIds = useMemo(() => {
+    return [
+      ...maintenance.map(s => s.id),
+      ...basic.map(s => s.id)
+    ];
+  }, [maintenance, basic]);
+  
+  const { getSessionCompletion } = useSessionCompletion(allSessionIds);
 
   const handlePress = (session: any) => {
     console.log('🟡 Tapped session:', session);
@@ -52,38 +64,63 @@ export default function CollectionScreen() {
             <ArrowLeft color="#e0f6ff" size={26} weight="light" />
           </TouchableOpacity>
 
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.description}>
-            {course?.description ?? 'Explore the sessions in this course.'}
-          </Text>
-          {error && <Text style={{ color: 'red' }}>Error: {error}</Text>}
-
-          <Text style={styles.sectionTitle}>Maintenance</Text>
-          <View style={styles.sessionsContainer}>
-            {maintenance.map(session => (
-              <SessionCard
-                key={session.id}
-                title={session.title}
-                subtitle="Maintenance session"
-                compact
-                showBookmark
-                onPress={() => handlePress(session)}
-              />
-            ))}
+          <View style={styles.heroContainer}>
+            <ImageBackground
+              source={require('@/assets/images/Index-bg.jpg')}
+              style={styles.heroBackground}
+              imageStyle={styles.heroImage}
+            >
+              <View style={styles.heroOverlay}>
+                <Text style={styles.heroTitle}>{title}</Text>
+                <Text style={styles.heroDescription}>
+                  {course?.description ?? 'Explore the sessions in this course.'}
+                </Text>
+              </View>
+            </ImageBackground>
           </View>
 
-          <Text style={styles.sectionTitle}>Course</Text>
+          {error && <Text style={{ color: 'red' }}>Error: {error}</Text>}
+
+          {maintenance.length > 0 && (
+            <>
+              <Text style={styles.sectionTitle}>Maintenance</Text>
+              <View style={styles.sessionsContainer}>
+                {maintenance.map(session => {
+                  const completion = getSessionCompletion(session.id);
+                  console.log(`🔍 Session ${session.title}: ${completion.status}`);
+                  return (
+                    <SessionCard
+                      key={session.id}
+                      title={session.title}
+                      subtitle="Maintenance session"
+                      compact
+                      showBookmark
+                      onPress={() => handlePress(session)}
+                      completionStatus={completion.status}
+                    />
+                  );
+                })}
+              </View>
+            </>
+          )}
+
+          <Text style={styles.sectionTitle}>Basic Training</Text>
           <View style={styles.sessionsContainer}>
-            {basic.map(session => (
-              <SessionCard
-                key={session.id}
-                title={session.title}
-                subtitle="Basic training session"
-                compact
-                showBookmark
-                onPress={() => handlePress(session)}
-              />
-            ))}
+            {basic.map(session => {
+              const completion = getSessionCompletion(session.id);
+              console.log(`🔍 Session ${session.title}: ${completion.status}`);
+              return (
+                <SessionCard
+                  key={session.id}
+                  title={session.title}
+                  subtitle="Basic training session"
+                  compact
+                  showBookmark
+                  onPress={() => handlePress(session)}
+                  completionStatus={completion.status}
+                />
+              );
+            })}
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -92,12 +129,12 @@ export default function CollectionScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: 'transparent' },
-  scrollContainer: { padding: 17, paddingTop: 80, paddingBottom: 40 },
+  safeArea: { flex: 1, backgroundColor: '#000' },
+  scrollContainer: { paddingBottom: 40 },
   title: { fontSize: 28, fontWeight: '400', color: '#fff', marginBottom: 20 },
   description: { fontSize: 16, color: '#aaa', marginBottom: 20 },
-  sectionTitle: { fontSize: 22, fontWeight: '400', color: '#fff', marginTop: 20, marginBottom: 10 },
-  sessionsContainer: { gap: 14 },
+  sectionTitle: { fontSize: 22, fontWeight: '400', color: '#fff', marginTop: 20, marginBottom: 10, paddingHorizontal: 17 },
+  sessionsContainer: { gap: 14, paddingHorizontal: 17 },
   backButton: {
     position: 'absolute',
     top: 32,
@@ -112,6 +149,49 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
+  },
+  heroContainer: {
+    width: '100%',
+    height: 200,
+    marginBottom: 20,
+    borderRadius: 0,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  heroBackground: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+    borderRadius: 0,
+  },
+  heroImage: {
+    borderRadius: 0,
+  },
+  heroOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    borderRadius: 0,
+    padding: 20,
+    justifyContent: 'flex-end',
+    alignItems: 'flex-start',
+  },
+  heroTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'left',
+    marginBottom: 10,
+  },
+  heroDescription: {
+    fontSize: 16,
+    color: '#fff',
+    textAlign: 'left',
   },
 });
 

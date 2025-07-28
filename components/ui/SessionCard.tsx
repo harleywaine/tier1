@@ -1,10 +1,11 @@
+import { CheckCircle } from 'phosphor-react-native';
 import React from 'react';
 import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ViewStyle,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+    ViewStyle,
 } from 'react-native';
 import { GradientButton } from './GradientButton';
 
@@ -21,6 +22,7 @@ interface SessionCardProps {
   plays?: string;
   showBookmark?: boolean;
   style?: ViewStyle;
+  completionStatus?: 'not_started' | 'started' | 'completed';
 }
 
 export const SessionCard = ({
@@ -36,6 +38,7 @@ export const SessionCard = ({
   plays,
   showBookmark,
   style,
+  completionStatus = 'not_started',
 }: SessionCardProps) => (
   <TouchableOpacity
     style={[
@@ -103,6 +106,11 @@ export const SessionCard = ({
       {duration && !compact && !large && (
         <Text style={styles.sessionCardDuration}>{duration}</Text>
       )}
+      {completionStatus === 'completed' && !large && (
+        <View style={styles.completionIcon}>
+          <CheckCircle size={20} color="#22c55e" weight="fill" />
+        </View>
+      )}
     </View>
 
     {progress !== undefined && !compact && (
@@ -121,15 +129,13 @@ export const SessionCard = ({
 
 const styles = StyleSheet.create({
   sessionCard: {
-    backgroundColor: 'rgba(40, 40, 40, 0.65)',
-    borderRadius: 18,
+    backgroundColor: '#1a1a1a',
+    borderRadius: 8,
     marginBottom: 20,
     padding: 0,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 12,
-    elevation: 12,
+    borderWidth: 1,
+    borderColor: '#2a2a2a',
+    height: 90,
   },
   sessionCardLarge: {
     padding: 18,
@@ -137,8 +143,10 @@ const styles = StyleSheet.create({
   sessionCardContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 18,
-    paddingBottom: 10,
+    padding: 32,
+    paddingBottom: 24,
+    height: '100%',
+    justifyContent: 'center',
   },
   sessionCardContentNoPadding: {
     padding: 0,
@@ -206,5 +214,13 @@ const styles = StyleSheet.create({
   progressFill: {
     height: '100%',
     backgroundColor: '#01b4d4',
+  },
+  completionIcon: {
+    position: 'absolute',
+    top: 0,
+    right: 10,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
