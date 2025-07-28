@@ -39,93 +39,102 @@ export const SessionCard = ({
   showBookmark,
   style,
   completionStatus = 'not_started',
-}: SessionCardProps) => (
-  <TouchableOpacity
-    style={[
-      styles.sessionCard,
-      large && styles.sessionCardLarge,
-      compact && styles.sessionCardCompact,
-      style,
-    ]}
-    onPress={onPress}
-    activeOpacity={0.7}
-  >
-    <View
+}: SessionCardProps) => {
+  console.log(`🎯 SessionCard "${title}" completionStatus:`, completionStatus);
+  
+  return (
+    <TouchableOpacity
       style={[
-        styles.sessionCardContent,
-        compact && styles.sessionCardContentCompact,
-        large && styles.sessionCardContentNoPadding,
-        large && {
-          flexDirection: 'column',
-          alignItems: 'flex-start',
-          paddingBottom: 0,
-        },
+        styles.sessionCard,
+        large && styles.sessionCardLarge,
+        compact && styles.sessionCardCompact,
+        style,
       ]}
+      onPress={onPress}
+      activeOpacity={0.7}
     >
-      {!large && (
-        <View
-          style={[
-            styles.sessionCardIcon,
-            compact && styles.sessionCardIconCompact,
-            large && { marginRight: 0, marginBottom: 12 },
-          ]}
-        >
-          <Text
-            style={{
-              fontSize: large ? 28 : compact ? 20 : 22,
-              color: '#fff',
-              opacity: 0.8,
-            }}
+      <View
+        style={[
+          styles.sessionCardContent,
+          compact && styles.sessionCardContentCompact,
+          large && styles.sessionCardContentNoPadding,
+          large && {
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            paddingBottom: 0,
+          },
+        ]}
+      >
+        {!large && (
+          <View
+            style={[
+              styles.sessionCardIcon,
+              compact && styles.sessionCardIconCompact,
+              large && { marginRight: 0, marginBottom: 12 },
+            ]}
           >
-            ▶
+            <Text
+              style={{
+                fontSize: large ? 28 : compact ? 20 : 22,
+                color: '#fff',
+                opacity: 0.8,
+              }}
+            >
+              ▶
+            </Text>
+          </View>
+        )}
+        <View style={large ? { width: '100%' } : { flex: 1 }}>
+          <Text
+            style={[
+              styles.sessionCardTitle,
+              large && styles.sessionCardTitleLarge,
+              compact && styles.sessionCardTitleCompact,
+            ]}
+          >
+            {title}
           </Text>
+          {subtitle && <Text style={styles.sessionCardSubtitle}>{subtitle}</Text>}
+          {description && (
+            <Text style={styles.sessionCardDescription}>{description}</Text>
+          )}
+          {large && duration && (
+            <Text
+              style={[styles.sessionCardDuration, { marginLeft: 0, marginTop: 6 }]}
+            >
+              {duration}
+            </Text>
+          )}
+        </View>
+        {duration && !compact && !large && (
+          <Text style={styles.sessionCardDuration}>{duration}</Text>
+        )}
+        {completionStatus === 'started' && !large && (
+          <View style={styles.completionIcon}>
+            <CheckCircle size={20} color="rgba(255, 255, 255, 0.6)" weight="light" />
+          </View>
+        )}
+        {completionStatus === 'completed' && !large && (
+          <View style={styles.completionIcon}>
+            <CheckCircle size={20} color="#22c55e" weight="fill" />
+          </View>
+        )}
+      </View>
+
+      {progress !== undefined && !compact && (
+        <View style={styles.progressBar}>
+          <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
         </View>
       )}
-      <View style={large ? { width: '100%' } : { flex: 1 }}>
-        <Text
-          style={[
-            styles.sessionCardTitle,
-            large && styles.sessionCardTitleLarge,
-            compact && styles.sessionCardTitleCompact,
-          ]}
-        >
-          {title}
-        </Text>
-        {subtitle && <Text style={styles.sessionCardSubtitle}>{subtitle}</Text>}
-        {description && (
-          <Text style={styles.sessionCardDescription}>{description}</Text>
-        )}
-        {large && duration && (
-          <Text
-            style={[styles.sessionCardDuration, { marginLeft: 0, marginTop: 6 }]}
-          >
-            {duration}
-          </Text>
-        )}
-      </View>
-      {duration && !compact && !large && (
-        <Text style={styles.sessionCardDuration}>{duration}</Text>
-      )}
-      {completionStatus === 'completed' && !large && (
-        <View style={styles.completionIcon}>
-          <CheckCircle size={20} color="#22c55e" weight="fill" />
+
+      {large && (
+        <View style={{ marginTop: 16, width: '100%' }}>
+          <GradientButton title={buttonLabel || ''} onPress={onPress} />
         </View>
       )}
-    </View>
-
-    {progress !== undefined && !compact && (
-      <View style={styles.progressBar}>
-        <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
-      </View>
-    )}
-
-    {large && (
-      <View style={{ marginTop: 16, width: '100%' }}>
-        <GradientButton title={buttonLabel || ''} onPress={onPress} />
-      </View>
-    )}
-  </TouchableOpacity>
-);
+    </TouchableOpacity>
+  );
+};
 
 const styles = StyleSheet.create({
   sessionCard: {

@@ -7,19 +7,19 @@ export interface ThemeConfig {
 
 export const themeConfigs: Record<string, ThemeConfig> = {
   'Core Systems': {
-    colors: ['#0a2e28'],
+    colors: ['#2a2a2a'],
     icon: Brain,
   },
   'Tactical Actions': {
-    colors: ['#3d2e16'],
+    colors: ['#0a0a0a'],
     icon: Target,
   },
   'Environment Packs': {
-    colors: ['#111a28'],
+    colors: ['#1f1f1f'],
     icon: Compass,
   },
   'Elite Performance Arcs': {
-    colors: ['#4a2516'],
+    colors: ['#151515'],
     icon: Star,
   },
   'default': {

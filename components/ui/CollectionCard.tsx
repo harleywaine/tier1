@@ -12,14 +12,11 @@ interface CollectionCardProps {
 }
 
 export const CollectionCard = ({ icon: Icon, title, sessions, color, fullWidth, hideIcon, disabled }: CollectionCardProps) => {
-  const appliedColor = color && color.length > 0 ? color[0] : null;
-  
   return (
   <View style={[
     styles.collectionCard,
     fullWidth && styles.collectionCardFullWidth,
-    disabled && styles.collectionCardDisabled,
-    appliedColor && { backgroundColor: appliedColor }
+    disabled && styles.collectionCardDisabled
   ]}>
     {Icon && !hideIcon ? (
       <View style={styles.iconCircle}>
@@ -38,8 +35,10 @@ const styles = StyleSheet.create({
   collectionCard: {
     width: 240,
     height: 100,
-    backgroundColor: 'rgba(40, 40, 40, 0.65)',
+    backgroundColor: '#1a1a1a',
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#2a2a2a',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 24,

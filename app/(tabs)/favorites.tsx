@@ -96,7 +96,7 @@ export default function FavoritesScreen() {
     const params = {
       audioUrl: encodedUrl,
       title: session.title,
-      author: session.author || 'Unknown',
+      author: session.course_title || 'Unknown',
       imageUrl: session.image_url || '',
       sessionId: session.id,
     };

@@ -6,7 +6,7 @@ import { useArcs } from '@/src/hooks/useArcs';
 import { useCourses } from '@/src/hooks/useCourses';
 import { useUserPlayHistory } from '@/src/hooks/useUserPlayHistory';
 import { useRouter } from 'expo-router';
-import { Lightning, Moon, Trophy, UserCircle } from 'phosphor-react-native';
+import { Lightning, Moon, Trophy } from 'phosphor-react-native';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, FlatList, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { supabase } from '../../lib/supabase';
@@ -66,7 +66,7 @@ export default function HomeScreen() {
                     params: {
                       audioUrl: encodedUrl,
                       title: lastPlayedSession.title,
-                      author: 'Unknown',
+                      author: lastPlayedSession.course_title || 'Course Session',
                       imageUrl: '',
                       sessionId: lastPlayedSession.session_id,
                     },
@@ -194,13 +194,6 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-        <TouchableOpacity
-          style={styles.avatarAbsolute}
-          onPress={() => router.push('/account')}
-        >
-          <UserCircle size={36} color="#fff" weight="light" />
-        </TouchableOpacity>
-        
         <View style={[styles.header, { paddingTop: rem(2.5) }]}>
           <View>
             <Text style={styles.title}>{`You're back${firstName ? ', ' + firstName : ''}`}</Text>
@@ -254,14 +247,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontFamily: 'SFProDisplay-Light',
   },
-  avatarAbsolute: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    zIndex: 10,
-    paddingTop: 8,
-    paddingRight: 8,
-  },
+
   horizontalList: {
     paddingLeft: 8,
     paddingVertical: 12,

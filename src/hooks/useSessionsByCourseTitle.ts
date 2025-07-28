@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useEffect, useState } from 'react';
 
 export function useSessionsByCourseTitle(courseTitle: string | undefined) {
   const [course, setCourse] = useState<any>(null);
@@ -31,8 +31,8 @@ export function useSessionsByCourseTitle(courseTitle: string | undefined) {
       setCourse(courseData);
 
       const [{ data: maintenanceData }, { data: basicData }] = await Promise.all([
-        supabase.from('maintenance_sessions').select('*').eq('course_id', courseData.id),
-        supabase.from('basic_training_sessions').select('*').eq('course_id', courseData.id),
+        supabase.from('maintenance_sessions').select('*').eq('course_id', courseData.id).order('position', { ascending: true }),
+        supabase.from('basic_training_sessions').select('*').eq('course_id', courseData.id).order('position', { ascending: true }),
       ]);
 
       setMaintenance(maintenanceData ?? []);

@@ -18,6 +18,7 @@ export interface LastPlayedSession {
   type: string;
   status: 'started' | 'completed';
   progress_percentage: number;
+  course_title?: string;
 }
 
 export function useUserPlayHistory() {
@@ -56,10 +57,10 @@ export function useUserPlayHistory() {
         return;
       }
 
-      // Verify the session still exists in the sessions view
+      // Verify the session still exists in the sessions view and get course info
       const { data: sessionData, error: sessionError } = await supabase
         .from('sessions')
-        .select('id, title, audio_url, type')
+        .select('id, title, audio_url, type, course_title')
         .eq('id', historyData.session_id)
         .single();
 
@@ -83,6 +84,7 @@ export function useUserPlayHistory() {
         type: sessionData.type,
         status: historyData.status,
         progress_percentage: historyData.progress_percentage,
+        course_title: sessionData.course_title,
       });
 
     } catch (err) {
@@ -95,8 +97,13 @@ export function useUserPlayHistory() {
 
   const recordSessionStart = async (sessionId: string) => {
     try {
+      console.log('🎵 recordSessionStart called for sessionId:', sessionId);
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        console.log('🎵 No user found, cannot record session start');
+        return;
+      }
+      console.log('🎵 User found:', user.id);
 
       // Check if we already have a record for this session
       const { data: existingRecord } = await supabase
@@ -106,9 +113,11 @@ export function useUserPlayHistory() {
         .eq('session_id', sessionId)
         .single();
 
+      console.log('🎵 Existing record check result:', existingRecord);
+
       if (existingRecord) {
         // Update existing record
-        await supabase
+        const { error: updateError } = await supabase
           .from('user_play_history')
           .update({ 
             status: 'started',
@@ -116,9 +125,11 @@ export function useUserPlayHistory() {
             updated_at: new Date().toISOString()
           })
           .eq('id', existingRecord.id);
+        
+        console.log('🎵 Update existing record result:', updateError ? 'Error: ' + updateError.message : 'Success');
       } else {
         // Create new record
-        await supabase
+        const { error: insertError } = await supabase
           .from('user_play_history')
           .insert({
             user_id: user.id,
@@ -126,6 +137,8 @@ export function useUserPlayHistory() {
             status: 'started',
             progress_percentage: 0,
           });
+        
+        console.log('🎵 Insert new record result:', insertError ? 'Error: ' + insertError.message : 'Success');
       }
 
       // Refresh the last played session
@@ -137,12 +150,16 @@ export function useUserPlayHistory() {
 
   const updateSessionProgress = async (sessionId: string, progressPercentage: number) => {
     try {
+      console.log('🎵 updateSessionProgress called for sessionId:', sessionId, 'progress:', progressPercentage);
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        console.log('🎵 No user found, cannot update session progress');
+        return;
+      }
 
       const status = progressPercentage >= 100 ? 'completed' : 'started';
 
-      await supabase
+      const { error: updateError } = await supabase
         .from('user_play_history')
         .update({ 
           status,
@@ -151,6 +168,8 @@ export function useUserPlayHistory() {
         })
         .eq('user_id', user.id)
         .eq('session_id', sessionId);
+
+      console.log('🎵 Update progress result:', updateError ? 'Error: ' + updateError.message : 'Success');
 
       // Refresh the last played session
       await fetchLastPlayedSession();

@@ -50,6 +50,7 @@ export default function ExploreScreen() {
           <View style={[styles.header, { paddingTop: rem(2.5) }]}>
             <View>
               <Text style={styles.title}>Explore</Text>
+              <Text style={styles.subtitle}>Here's your psychological arsenal, you'll find everything you need to operate at your peak.</Text>
             </View>
           </View>
 
@@ -155,7 +156,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.45)',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 20,
+    borderRadius: 8,
     zIndex: 2,
   },
   themeSection: {

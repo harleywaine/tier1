@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay-Bold',
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 12,
+    borderRadius: 6,
     overflow: 'hidden',
   },
   title: {

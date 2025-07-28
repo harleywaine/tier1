@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 
+import { SplashScreen } from '@/components/ui/SplashScreen';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { supabase } from '@/lib/supabase';
 
@@ -21,6 +22,7 @@ export default function RootLayout() {
   // Use the correct type for session state
   const [session, setSession] = useState<any>(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
     // Get current session
@@ -40,7 +42,16 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (!authChecked) return;
+    // Force splash screen to show for at least 2 seconds
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!authChecked || showSplash) return;
 
     const inAuthGroup = (segments as string[]).includes('(auth)');
 
@@ -49,10 +60,10 @@ export default function RootLayout() {
     } else if (session && inAuthGroup) {
       router.replace('/(tabs)');
     }
-  }, [session, segments, authChecked]);
+  }, [session, segments, authChecked, showSplash]);
 
-  if (!loaded || !authChecked) {
-    return null; // Or show splash/loading screen
+  if (!loaded || !authChecked || showSplash) {
+    return <SplashScreen />;
   }
 
   return (

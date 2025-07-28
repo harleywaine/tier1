@@ -19,11 +19,14 @@ export default function PlayScreen() {
     author?: string;
     sessionId?: string;
   }>();
+  
+  console.log('🎵 Play page all params:', params);
   const audioUrl = decodeURIComponent(params.audioUrl);
   const title = params.title || 'Session';
   const author = params.author || 'Glenn Harrold';
   const sessionId = params.sessionId;
   console.log('🎵 Play page sessionId:', sessionId);
+  console.log('🎵 Play page author:', author);
   console.log('🎵 Play page isFavorited:', sessionId ? isFavorited(sessionId) : 'No sessionId');
 
   const { status, isLoading, error, play, pause, seekTo } = useAudioPlayer(audioUrl);
@@ -41,17 +44,23 @@ export default function PlayScreen() {
     if (sessionId && isPlaying && !hasRecordedStart) {
       console.log('🎵 Recording session start for:', sessionId);
       recordSessionStart(sessionId);
+      // Also update progress immediately to ensure status is set
+      if (duration > 0 && position > 0) {
+        const progressPercentage = Math.round((position / duration) * 100);
+        console.log('🎵 Immediate progress update for session:', sessionId, 'Progress:', progressPercentage + '%');
+        updateSessionProgress(sessionId, progressPercentage);
+      }
       setHasRecordedStart(true);
     }
-  }, [sessionId, isPlaying, hasRecordedStart, recordSessionStart]);
+  }, [sessionId, isPlaying, hasRecordedStart, recordSessionStart, duration, position, updateSessionProgress]);
 
-  // Update progress every 15 seconds
+  // Update progress more frequently
   React.useEffect(() => {
     if (sessionId && duration > 0 && position > 0) {
       const progressPercentage = Math.round((position / duration) * 100);
       
-      // Update progress every 15 seconds or when reaching 100%
-      const shouldUpdate = progressPercentage % 15 === 0 || progressPercentage >= 100;
+      // Update progress every 5 seconds or when reaching 100%
+      const shouldUpdate = progressPercentage % 5 === 0 || progressPercentage >= 100;
       
       if (shouldUpdate) {
         console.log('🎵 Updating progress for session:', sessionId, 'Progress:', progressPercentage + '%');

@@ -2,9 +2,10 @@ import { Background } from '@/components/ui/Background';
 import { SessionCard } from '@/components/ui/SessionCard';
 import { useSessionCompletion } from '@/src/hooks/useSessionCompletion';
 import { useSessionsByCourseTitle } from '@/src/hooks/useSessionsByCourseTitle';
+import { useIsFocused } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft } from 'phosphor-react-native';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
     ImageBackground,
     SafeAreaView,
@@ -18,18 +19,35 @@ import {
 export default function CollectionScreen() {
   const { title } = useLocalSearchParams<{ title: string }>();
   const router = useRouter();
+  const isFocused = useIsFocused();
+  
+  console.log('🔍 Collection page title parameter:', title);
 
   const { course, maintenance, basic, loading, error } = useSessionsByCourseTitle(title);
+  
+  console.log('🔍 Course data:', course);
+  console.log('🔍 Course title from data:', course?.title);
 
   // Get all session IDs for completion tracking
   const allSessionIds = useMemo(() => {
-    return [
+    const ids = [
       ...maintenance.map(s => s.id),
       ...basic.map(s => s.id)
     ];
+    console.log('🔍 Session IDs for completion tracking:', ids);
+    return ids;
   }, [maintenance, basic]);
   
-  const { getSessionCompletion } = useSessionCompletion(allSessionIds);
+  const { getSessionCompletion, refresh } = useSessionCompletion(allSessionIds);
+
+  // Refresh completion data when screen comes into focus
+  useEffect(() => {
+    console.log('🔄 Collection screen focus effect triggered, isFocused:', isFocused);
+    if (isFocused) {
+      console.log('🔄 Collection screen focused, refreshing completion data');
+      refresh();
+    }
+  }, [isFocused, refresh]);
 
   const handlePress = (session: any) => {
     console.log('🟡 Tapped session:', session);
@@ -43,12 +61,13 @@ export default function CollectionScreen() {
     const params = {
       audioUrl: encodedUrl,
       title: session.title,
-      author: session.author || 'Unknown',
+      author: course?.title || title || 'Unknown',
       imageUrl: session.image_url || '',
       sessionId: session.id,
     };
 
     console.log('🟢 Navigating to /play with params:', params);
+    console.log('🟢 Course title being passed as author:', course?.title || title);
 
     router.push({
       pathname: '/play',
@@ -88,6 +107,7 @@ export default function CollectionScreen() {
                 {maintenance.map(session => {
                   const completion = getSessionCompletion(session.id);
                   console.log(`🔍 Session ${session.title}: ${completion.status}`);
+                  console.log(`🔍 Session ${session.id} completion data:`, completion);
                   return (
                     <SessionCard
                       key={session.id}
@@ -109,6 +129,7 @@ export default function CollectionScreen() {
             {basic.map(session => {
               const completion = getSessionCompletion(session.id);
               console.log(`🔍 Session ${session.title}: ${completion.status}`);
+              console.log(`🔍 Session ${session.id} completion data:`, completion);
               return (
                 <SessionCard
                   key={session.id}

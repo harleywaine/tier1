@@ -1,24 +1,17 @@
 import { Background } from '@/components/ui/Background';
-import { GradientButton } from '@/components/ui/GradientButton';
-import { SecondaryButton } from '@/components/ui/SecondaryButton';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Alert, Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { supabase } from '../../lib/supabase';
+import { ArrowLeft } from 'phosphor-react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { supabase } from '../lib/supabase';
 
-const windowHeight = Dimensions.get('window').height;
-const windowWidth = Dimensions.get('window').width;
-const baseFontSize = 16; // Base font size for REM calculations
-const rem = (size: number) => size * baseFontSize;
-
-export default function AccountScreen() {
+export default function AccountSettingsScreen() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
   const [firstName, setFirstName] = useState<string>('');
   const [lastName, setLastName] = useState<string>('');
   const [isEditing, setIsEditing] = useState(false);
-  const [profileLoading, setProfileLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -39,7 +32,7 @@ export default function AccountScreen() {
   const handleSaveProfile = async () => {
     if (!userId) return;
     
-    setProfileLoading(true);
+    setLoading(true);
     try {
       const { error } = await supabase.auth.updateUser({
         data: {
@@ -57,41 +50,6 @@ export default function AccountScreen() {
     } catch (err) {
       Alert.alert('Error', 'Failed to update profile');
     } finally {
-      setProfileLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      setLoading(true);
-      console.log('Attempting to sign out...');
-
-      const { data: { session } } = await supabase.auth.getSession();
-      console.log('Current session:', session ? 'exists' : 'none');
-
-      if (!session) {
-        console.log('No active session, redirecting to sign in...');
-        router.replace('../SignIn');
-        return;
-      }
-
-      const { error } = await supabase.auth.signOut();
-      console.log('Sign out response:', error ? 'error' : 'success');
-
-      if (error) {
-        console.error('Sign out error:', error);
-        Alert.alert('Error', error.message);
-      } else {
-        console.log('Sign out successful, redirecting...');
-        router.replace('../SignIn');
-      }
-    } catch (err) {
-      console.error('Unexpected error during sign out:', err);
-      Alert.alert(
-        'Network Error',
-        'Unable to sign out. Please check your internet connection and try again.'
-      );
-    } finally {
       setLoading(false);
     }
   };
@@ -99,12 +57,12 @@ export default function AccountScreen() {
   return (
     <Background>
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView style={styles.container} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-          <View style={[styles.header, { paddingTop: rem(2.5) }]}>
-            <View>
-              <Text style={styles.title}>Account</Text>
-            </View>
-          </View>
+        <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <ArrowLeft color="#e0f6ff" size={26} weight="light" />
+          </TouchableOpacity>
+
+          <Text style={styles.title}>Account Settings</Text>
           
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
@@ -118,8 +76,8 @@ export default function AccountScreen() {
                   <TouchableOpacity onPress={() => setIsEditing(false)} style={styles.cancelButton}>
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={handleSaveProfile} style={styles.saveButton} disabled={profileLoading}>
-                    <Text style={styles.saveButtonText}>{profileLoading ? 'Saving...' : 'Save'}</Text>
+                  <TouchableOpacity onPress={handleSaveProfile} style={styles.saveButton} disabled={loading}>
+                    <Text style={styles.saveButtonText}>{loading ? 'Saving...' : 'Save'}</Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -193,13 +151,6 @@ export default function AccountScreen() {
               <Text style={styles.settingValue}>→</Text>
             </TouchableOpacity>
           </View>
-
-          <View style={styles.signOutContainer}>
-            <SecondaryButton
-              title={loading ? 'Signing out...' : 'Sign Out'}
-              onPress={handleLogout}
-            />
-          </View>
         </ScrollView>
       </SafeAreaView>
     </Background>
@@ -207,57 +158,38 @@ export default function AccountScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#000',
+  safeArea: { 
+    flex: 1, 
+    backgroundColor: '#000' 
   },
-  container: {
-    flex: 1,
-    padding: 17,
-    backgroundColor: '#000',
+  scrollContainer: { 
+    padding: 17, 
+    paddingTop: 80, 
+    paddingBottom: 40 
   },
-  content: {
-    flex: 1,
-    paddingBottom: rem(4),
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  backButton: {
+    position: 'absolute',
+    top: 32,
+    left: 20,
+    zIndex: 10,
+    backgroundColor: 'rgba(20, 24, 32, 0.7)',
+    borderRadius: 20,
+    padding: 8,
     alignItems: 'center',
-    marginBottom: 40,
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
   },
-  title: {
-    fontSize: 28,
-    fontFamily: 'SFProDisplay-Regular',
-    color: '#fff',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#aaa',
-    marginTop: 2,
-    fontFamily: 'SFProDisplay-Light',
-  },
-  infoContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    color: '#aaa',
-    fontSize: 16,
-    marginBottom: 2,
-    fontFamily: 'SFProDisplay-Light',
-  },
-  value: {
-    color: '#fff',
-    fontSize: 18,
-    fontFamily: 'SFProDisplay-Light',
+  title: { 
+    fontSize: 28, 
+    fontWeight: '400', 
+    color: '#fff', 
+    marginBottom: 30 
   },
   section: {
-    backgroundColor: '#1a1a1a',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#333',
+    marginBottom: 30,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -265,55 +197,73 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 15,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontFamily: 'SFProDisplay-Regular',
-    color: '#fff',
+  sectionTitle: { 
+    fontSize: 20, 
+    fontWeight: '600', 
+    color: '#fff', 
   },
   editButton: {
     color: '#007bff',
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: 'SFProDisplay-Regular',
   },
   editActions: {
     flexDirection: 'row',
-    alignItems: 'center',
+    gap: 10,
   },
   cancelButton: {
-    marginRight: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#007bff',
   },
   cancelButtonText: {
     color: '#007bff',
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: 'SFProDisplay-Regular',
   },
   saveButton: {
-    backgroundColor: '#007bff',
-    paddingVertical: 8,
-    paddingHorizontal: 15,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
     borderRadius: 8,
+    backgroundColor: '#007bff',
   },
   saveButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontFamily: 'SFProDisplay-Regular',
+  },
+  infoContainer: {
+    marginBottom: 15,
+  },
+  label: {
+    color: '#aaa',
+    fontSize: 14,
+    marginBottom: 4,
+    fontFamily: 'SFProDisplay-Light',
+  },
+  value: {
     color: '#fff',
     fontSize: 16,
     fontFamily: 'SFProDisplay-Regular',
   },
   input: {
     color: '#fff',
-    fontSize: 18,
-    fontFamily: 'SFProDisplay-Light',
+    fontSize: 16,
+    fontFamily: 'SFProDisplay-Regular',
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
-    paddingBottom: 5,
-    marginBottom: 10,
+    borderBottomColor: 'rgba(255, 255, 255, 0.2)',
+    paddingVertical: 5,
   },
   settingItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 0,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
   settingLabel: {
     color: '#fff',
@@ -325,7 +275,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'SFProDisplay-Light',
   },
-  signOutContainer: {
-    marginTop: 20,
-  },
 });
+
+export const options = { headerShown: false }; 
