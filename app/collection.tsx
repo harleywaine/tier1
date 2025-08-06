@@ -114,7 +114,7 @@ export default function CollectionScreen() {
               {/* Sessions skeleton */}
               <View style={styles.sessionsContainer}>
                 {sessionSkeletons.map((_, index) => (
-                  <View key={index} style={{ marginBottom: 12 }}>
+                  <View key={index}>
                     <SessionCardSkeleton />
                   </View>
                 ))}
@@ -134,16 +134,13 @@ export default function CollectionScreen() {
                       console.log(`🔍 Session ${session.id} completion data:`, completion);
                       
                       return (
-                        <TouchableOpacity
+                        <SessionCard
                           key={session.id}
+                          title={session.title}
+                          subtitle={`Lesson ${session.position}`}
+                          completionStatus={completion.status}
                           onPress={() => handlePress(session)}
-                        >
-                          <SessionCard
-                            title={session.title}
-                            subtitle={`Lesson ${session.position}`}
-                            completionStatus={completion.status}
-                          />
-                        </TouchableOpacity>
+                        />
                       );
                     })}
                   </View>
@@ -159,16 +156,13 @@ export default function CollectionScreen() {
                       const completion = getSessionCompletion(session.id);
                       
                       return (
-                        <TouchableOpacity
+                        <SessionCard
                           key={session.id}
+                          title={session.title}
+                          subtitle={`Lesson ${session.position}`}
+                          completionStatus={completion.status}
                           onPress={() => handlePress(session)}
-                        >
-                          <SessionCard
-                            title={session.title}
-                            subtitle={`Lesson ${session.position}`}
-                            completionStatus={completion.status}
-                          />
-                        </TouchableOpacity>
+                        />
                       );
                     })}
                   </View>
@@ -188,7 +182,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: '400', color: '#fff', marginBottom: 20 },
   description: { fontSize: 16, color: '#aaa', marginBottom: 20 },
   sectionTitle: { fontSize: 22, fontWeight: '400', color: '#fff', marginTop: 20, marginBottom: 10, paddingHorizontal: 17 },
-  sessionsContainer: { gap: 14, paddingHorizontal: 17 },
+  sessionsContainer: { gap: 16, paddingHorizontal: 17 },
   backButton: {
     position: 'absolute',
     top: 32,

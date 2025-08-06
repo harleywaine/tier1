@@ -54,10 +54,12 @@ export default function RootLayout() {
     if (!authChecked || showSplash) return;
 
     const inAuthGroup = (segments as string[]).includes('(auth)');
+    const isResetPassword = (segments as string[]).includes('ResetPassword');
+    const isUpdatePassword = (segments as string[]).includes('UpdatePassword');
 
-    if (!session && !inAuthGroup) {
+    if (!session && !inAuthGroup && !isUpdatePassword) {
       router.replace('../SignIn');
-    } else if (session && inAuthGroup) {
+    } else if (session && inAuthGroup && !isResetPassword) {
       router.replace('/(tabs)');
     }
   }, [session, segments, authChecked, showSplash]);
@@ -73,6 +75,7 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="play" options={{ headerShown: false }} />
         <Stack.Screen name="collection" options={{ headerShown: false }} />
+        <Stack.Screen name="UpdatePassword" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />

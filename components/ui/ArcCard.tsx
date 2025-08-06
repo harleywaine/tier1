@@ -1,3 +1,4 @@
+import { getArcColorScheme } from '@/constants/ArcColors';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -11,15 +12,32 @@ interface ArcCardProps {
 }
 
 export const ArcCard = ({ name, title, description, onPress, children, style }: ArcCardProps) => {
+  const colorScheme = getArcColorScheme(name);
+  
   return (
     <TouchableOpacity
-      style={[styles.arcCard, style]}
+      style={[
+        styles.arcCard, 
+        { 
+          backgroundColor: colorScheme.background,
+          borderColor: colorScheme.border,
+        },
+        style
+      ]}
       onPress={onPress}
       activeOpacity={0.7}
       disabled={!onPress}
     >
       <View style={styles.tagContainer}>
-        <Text style={styles.tag}>{name.toUpperCase()}</Text>
+        <Text style={[
+          styles.tag,
+          {
+            backgroundColor: colorScheme.tag,
+            color: colorScheme.tagText,
+          }
+        ]}>
+          {name.toUpperCase()}
+        </Text>
       </View>
       
       <Text style={styles.title}>{title}</Text>
@@ -32,25 +50,21 @@ export const ArcCard = ({ name, title, description, onPress, children, style }: 
 
 const styles = StyleSheet.create({
   arcCard: {
-    backgroundColor: '#1a1a1a',
     borderRadius: 8,
     padding: 20,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#2a2a2a',
   },
   tagContainer: {
     alignSelf: 'flex-start',
     marginBottom: 12,
   },
   tag: {
-    backgroundColor: '#2a2a2a',
-    color: '#fff',
     fontSize: 12,
     fontFamily: 'SFProDisplay-Bold',
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 6,
+    borderRadius: 0,
     overflow: 'hidden',
   },
   title: {

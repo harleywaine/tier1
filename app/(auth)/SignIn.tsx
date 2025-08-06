@@ -3,19 +3,19 @@ import { GradientButton } from '@/components/ui/GradientButton';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-  Alert,
-  Dimensions,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
+    Alert,
+    Dimensions,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View,
 } from 'react-native';
 import { supabase } from '../../lib/supabase';
 
@@ -78,6 +78,9 @@ export default function SignIn() {
                     secureTextEntry
                     style={styles.input}
                   />
+                  <TouchableOpacity onPress={() => router.push('../ResetPassword')} style={styles.forgotPasswordContainer}>
+                    <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+                  </TouchableOpacity>
                   <GradientButton
                     title={loading ? 'Signing in...' : 'Sign In'}
                     onPress={loading ? undefined : handleSignIn}
@@ -142,5 +145,14 @@ const styles = StyleSheet.create({
     fontSize: rem(0.875),
     marginTop: rem(1),
     fontFamily: 'SFProDisplay-Light',
+  },
+  forgotPasswordContainer: {
+    alignItems: 'flex-end',
+    marginBottom: rem(1),
+  },
+  forgotPasswordText: {
+    color: '#007bff',
+    fontSize: rem(0.875),
+    fontFamily: 'SFProDisplay-Regular',
   },
 });

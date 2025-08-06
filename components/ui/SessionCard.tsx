@@ -140,7 +140,6 @@ const styles = StyleSheet.create({
   sessionCard: {
     backgroundColor: '#1a1a1a',
     borderRadius: 8,
-    marginBottom: 20,
     padding: 0,
     borderWidth: 1,
     borderColor: '#2a2a2a',

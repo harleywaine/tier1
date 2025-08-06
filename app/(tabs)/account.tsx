@@ -1,9 +1,10 @@
 import { Background } from '@/components/ui/Background';
 import { GradientButton } from '@/components/ui/GradientButton';
 import { SecondaryButton } from '@/components/ui/SecondaryButton';
+import { useFeedback } from '@/src/hooks/useFeedback';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Dimensions, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { supabase } from '../../lib/supabase';
 
 const windowHeight = Dimensions.get('window').height;
@@ -20,6 +21,9 @@ export default function AccountScreen() {
   const [isEditing, setIsEditing] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const { submitFeedback, loading: feedbackLoading, error: feedbackError } = useFeedback();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -96,10 +100,59 @@ export default function AccountScreen() {
     }
   };
 
+  const handleSubmitFeedback = async () => {
+    const success = await submitFeedback(feedbackMessage);
+    if (success) {
+      setShowSuccessMessage(true);
+      setFeedbackMessage('');
+    }
+  };
+
+  const handleCloseSuccessMessage = () => {
+    setShowSuccessMessage(false);
+  };
+
+  const handleResetPassword = async () => {
+    if (!email) {
+      Alert.alert('Error', 'No email address found. Please contact support.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'tier1://update-password',
+      });
+
+      if (error) {
+        Alert.alert('Error', error.message);
+      } else {
+        Alert.alert(
+          'Password Reset Email Sent',
+          `We've sent a password reset link to ${email}. Please check your email and follow the instructions to reset your password.`
+        );
+      }
+    } catch (err) {
+      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Background>
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView style={styles.container} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+        <KeyboardAvoidingView 
+          style={styles.keyboardAvoidingView}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        >
+          <ScrollView 
+            style={styles.container} 
+            showsVerticalScrollIndicator={false} 
+            contentContainerStyle={{ paddingBottom: 100 }}
+            keyboardShouldPersistTaps="handled"
+          >
           <View style={[styles.header, { paddingTop: rem(2.5) }]}>
             <View>
               <Text style={styles.title}>Account</Text>
@@ -159,48 +212,76 @@ export default function AccountScreen() {
                 <Text style={styles.value}>{lastName || 'Not set'}</Text>
               )}
             </View>
+            
+            <TouchableOpacity 
+              style={styles.resetPasswordButton} 
+              onPress={handleResetPassword}
+              disabled={loading}
+            >
+              <Text style={styles.resetPasswordText}>
+                {loading ? 'Sending...' : 'Reset Password'}
+              </Text>
+            </TouchableOpacity>
           </View>
+
+          <TouchableOpacity 
+            style={styles.signOutButton} 
+            onPress={handleLogout}
+            disabled={loading}
+          >
+            <Text style={styles.signOutButtonText}>
+              {loading ? 'Signing out...' : 'Sign Out'}
+            </Text>
+          </TouchableOpacity>
+
+
+
+
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Preferences</Text>
+            <Text style={styles.sectionTitle}>Feedback</Text>
+            <Text style={styles.feedbackDescription}>
+              Help us improve by sharing your thoughts, suggestions, or reporting issues.
+            </Text>
             
-            <TouchableOpacity style={styles.settingItem}>
-              <Text style={styles.settingLabel}>Notifications</Text>
-              <Text style={styles.settingValue}>On</Text>
-            </TouchableOpacity>
+            {showSuccessMessage && (
+              <View style={styles.successMessage}>
+                <Text style={styles.successText}>Thank you for your feedback! We'll review it shortly.</Text>
+                <TouchableOpacity onPress={handleCloseSuccessMessage} style={styles.closeButton}>
+                  <Text style={styles.closeButtonText}>×</Text>
+                </TouchableOpacity>
+              </View>
+            )}
             
-            <TouchableOpacity style={styles.settingItem}>
-              <Text style={styles.settingLabel}>Dark Mode</Text>
-              <Text style={styles.settingValue}>Enabled</Text>
-            </TouchableOpacity>
+            {feedbackError && (
+              <Text style={styles.errorText}>{feedbackError}</Text>
+            )}
             
-            <TouchableOpacity style={styles.settingItem}>
-              <Text style={styles.settingLabel}>Auto-play</Text>
-              <Text style={styles.settingValue}>Off</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Data & Privacy</Text>
-            
-            <TouchableOpacity style={styles.settingItem}>
-              <Text style={styles.settingLabel}>Export Data</Text>
-              <Text style={styles.settingValue}>→</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.settingItem}>
-              <Text style={styles.settingLabel}>Delete Account</Text>
-              <Text style={styles.settingValue}>→</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.signOutContainer}>
-            <SecondaryButton
-              title={loading ? 'Signing out...' : 'Sign Out'}
-              onPress={handleLogout}
+            <TextInput
+              style={styles.feedbackInput}
+              value={feedbackMessage}
+              onChangeText={setFeedbackMessage}
+              placeholder="Share your feedback, suggestions, or report issues..."
+              placeholderTextColor="#666"
+              multiline
+              numberOfLines={4}
+              maxLength={500}
+              textAlignVertical="top"
             />
-          </View>
-        </ScrollView>
+            
+            <View style={styles.feedbackFooter}>
+              <Text style={styles.characterCount}>
+                {feedbackMessage.length}/500
+              </Text>
+              <GradientButton
+                title={feedbackLoading ? 'Submitting...' : 'Submit Feedback'}
+                onPress={handleSubmitFeedback}
+                disabled={feedbackLoading || feedbackMessage.trim().length < 5}
+              />
+            </View>
+                      </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </Background>
   );
@@ -210,6 +291,9 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#000',
+  },
+  keyboardAvoidingView: {
+    flex: 1,
   },
   container: {
     flex: 1,
@@ -325,7 +409,105 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'SFProDisplay-Light',
   },
-  signOutContainer: {
+  signOutButton: {
+    backgroundColor: '#2a2a2a',
+    borderRadius: 10,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#333',
+    marginBottom: 20,
+    width: '100%',
+  },
+  signOutButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: 'SFProDisplay-Regular',
+    fontWeight: '600',
+  },
+  feedbackDescription: {
+    color: '#aaa',
+    fontSize: 14,
+    marginTop: 8,
+    marginBottom: 20,
+    fontFamily: 'SFProDisplay-Light',
+    lineHeight: 20,
+  },
+  feedbackInput: {
+    backgroundColor: '#2a2a2a',
+    borderRadius: 8,
+    padding: 12,
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: 'SFProDisplay-Regular',
+    borderWidth: 1,
+    borderColor: '#333',
+    minHeight: 100,
+    marginBottom: 15,
+  },
+  feedbackFooter: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: 15,
+  },
+  characterCount: {
+    color: '#666',
+    fontSize: 14,
+    fontFamily: 'SFProDisplay-Light',
+  },
+  successMessage: {
+    backgroundColor: '#1a3a1a',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#22c55e',
+  },
+  successText: {
+    color: '#22c55e',
+    fontSize: 14,
+    fontFamily: 'SFProDisplay-Regular',
+    flex: 1,
+  },
+  closeButton: {
+    marginLeft: 10,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#22c55e',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeButtonText: {
+    color: '#000',
+    fontSize: 16,
+    fontFamily: 'SFProDisplay-Bold',
+    lineHeight: 18,
+  },
+  errorText: {
+    color: '#ef4444',
+    fontSize: 14,
+    fontFamily: 'SFProDisplay-Regular',
+    marginBottom: 15,
+  },
+  resetPasswordButton: {
     marginTop: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#333',
+    alignItems: 'center',
+  },
+  resetPasswordText: {
+    color: '#007bff',
+    fontSize: 16,
+    fontFamily: 'SFProDisplay-Regular',
   },
 });

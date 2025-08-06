@@ -6,21 +6,23 @@ interface GradientButtonProps {
   title: string;
   onPress?: () => void;
   style?: ViewStyle;
+  disabled?: boolean;
 }
 
-export const GradientButton = ({ title, onPress, style }: GradientButtonProps) => (
+export const GradientButton = ({ title, onPress, style, disabled }: GradientButtonProps) => (
   <TouchableOpacity
     onPress={onPress}
     activeOpacity={0.8}
     style={[styles.buttonContainer, style]}
+    disabled={disabled}
   >
     <LinearGradient
-      colors={['#457b9d', '#2c4a63']}
+      colors={disabled ? ['#666', '#444'] : ['#457b9d', '#2c4a63']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 0 }}
-      style={styles.gradientButton}
+      style={[styles.gradientButton, disabled && styles.disabledButton]}
     >
-      <Text style={styles.gradientButtonText}>{title}</Text>
+      <Text style={[styles.gradientButtonText, disabled && styles.disabledText]}>{title}</Text>
     </LinearGradient>
   </TouchableOpacity>
 );
@@ -43,5 +45,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 18,
     textAlign: 'center',
+  },
+  disabledButton: {
+    opacity: 0.6,
+  },
+  disabledText: {
+    color: '#999',
   },
 }); 

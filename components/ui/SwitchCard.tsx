@@ -1,8 +1,8 @@
 import React from 'react';
-import { StyleSheet, View, ViewStyle } from 'react-native';
+import { StyleSheet, Text, View, ViewStyle } from 'react-native';
 
 interface SwitchCardProps {
-  icon: React.ComponentType<any>;
+  icon?: React.ComponentType<any>;
   title: string;
   color: string[];
   style?: ViewStyle;
@@ -11,9 +11,12 @@ interface SwitchCardProps {
 export const SwitchCard = ({ icon: Icon, title, color, style }: SwitchCardProps) => (
   <View style={[styles.switchCard, style]}>
     <View style={styles.iconCircle}> 
-      <Icon size={22} color="#fff" weight="light" />
+      {Icon ? (
+        <Icon size={22} color="#fff" weight="light" />
+      ) : (
+        <Text style={styles.switchText}>{title}</Text>
+      )}
     </View>
-    {/* <Text style={styles.switchTitle}>{title}</Text> */}
   </View>
 );
 
@@ -30,7 +33,7 @@ const styles = StyleSheet.create({
     borderColor: '#2a2a2a',
   },
   iconCircle: {
-    width: 36,
+    width: 60,
     height: 36,
     borderRadius: 18,
     alignItems: 'center',
@@ -41,5 +44,13 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     fontSize: 13,
     textAlign: 'center',
+  },
+  switchText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 11,
+    textAlign: 'center',
+    fontFamily: 'SFProDisplay-Regular',
+    paddingHorizontal: 2,
   },
 }); 

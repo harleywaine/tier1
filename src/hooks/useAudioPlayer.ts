@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import { Audio } from 'expo-av';
 import type { AVPlaybackStatus } from 'expo-av';
+import { Audio } from 'expo-av';
+import { useEffect, useRef, useState } from 'react';
 
 export function useAudioPlayer(uri: string) {
   const soundRef = useRef<Audio.Sound | null>(null);

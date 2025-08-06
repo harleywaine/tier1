@@ -37,6 +37,8 @@ export function useUserPlayHistory() {
         return;
       }
 
+      console.log('🔍 Fetching play history for user:', user.id);
+      
       // Get the most recent play history entry
       const { data: historyData, error: historyError } = await supabase
         .from('user_play_history')
@@ -46,6 +48,8 @@ export function useUserPlayHistory() {
         .limit(1)
         .single();
 
+      console.log('🔍 Play history query result:', { historyData, historyError });
+
       if (historyError && historyError.code !== 'PGRST116') { // PGRST116 = no rows returned
         console.error('Error fetching play history:', historyError);
         setError(historyError.message);
@@ -53,16 +57,62 @@ export function useUserPlayHistory() {
       }
 
       if (!historyData) {
+        console.log('🔍 No play history found for user');
         setLastPlayedSession(null);
         return;
       }
 
-      // Verify the session still exists in the sessions view and get course info
-      const { data: sessionData, error: sessionError } = await supabase
-        .from('sessions')
-        .select('id, title, audio_url, type, course_title')
+      console.log('🔍 Looking up session:', historyData.session_id);
+      
+      // Try to find the session in maintenance_sessions first
+      let { data: sessionData, error: sessionError } = await supabase
+        .from('maintenance_sessions')
+        .select(`
+          id,
+          title,
+          audio_url,
+          position,
+          course_id
+        `)
         .eq('id', historyData.session_id)
         .single();
+
+      // If not found in maintenance_sessions, try basic_training_sessions
+      if (sessionError && sessionError.code === 'PGRST116') {
+        const { data: basicSessionData, error: basicSessionError } = await supabase
+          .from('basic_training_sessions')
+          .select(`
+            id,
+            title,
+            audio_url,
+            position,
+            course_id
+          `)
+          .eq('id', historyData.session_id)
+          .single();
+        
+        sessionData = basicSessionData;
+        sessionError = basicSessionError;
+      }
+
+      // If session found, get the course title
+      let courseTitle = null;
+      if (sessionData && sessionData.course_id) {
+        const { data: courseData } = await supabase
+          .from('courses')
+          .select('title')
+          .eq('id', sessionData.course_id)
+          .single();
+        
+        courseTitle = courseData?.title;
+      }
+
+      console.log('🔍 Session lookup result:', { 
+        sessionData, 
+        sessionError,
+        courseTitle: sessionData?.courses?.title,
+        sessionId: sessionData?.id 
+      });
 
       if (sessionError || !sessionData) {
         // Session no longer exists, clean up the history entry
@@ -77,15 +127,18 @@ export function useUserPlayHistory() {
       }
 
       // Return the last played session with session details
-      setLastPlayedSession({
+      const lastSession = {
         session_id: sessionData.id,
         title: sessionData.title,
         audio_url: sessionData.audio_url,
-        type: sessionData.type,
+        type: sessionData.position <= 10 ? 'basic' : 'maintenance',
         status: historyData.status,
         progress_percentage: historyData.progress_percentage,
-        course_title: sessionData.course_title,
-      });
+        course_title: courseTitle,
+      };
+      
+      console.log('🔍 Setting last played session:', lastSession);
+      setLastPlayedSession(lastSession);
 
     } catch (err) {
       console.error('Error in fetchLastPlayedSession:', err);

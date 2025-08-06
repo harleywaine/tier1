@@ -81,8 +81,8 @@ export default function HomeScreen() {
                     },
                   });
                 } else {
-                  // Navigate to explore page
-                  router.push('/explore');
+                  // Navigate to protocols page
+                  router.push('/protocols');
                 }
               }}
               style={{ marginTop: 16 }}
@@ -159,7 +159,7 @@ export default function HomeScreen() {
                 <View style={styles.horizontalCard}>
                   <TouchableOpacity 
                     style={styles.seeMoreCard}
-                    onPress={() => router.push('/explore')}
+                    onPress={() => router.push('/protocols')}
                   >
                     <Text style={styles.seeMoreCardText}>See more</Text>
                   </TouchableOpacity>
@@ -291,8 +291,10 @@ const styles = StyleSheet.create({
     height: 100,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#2a2a2a',
-    borderRadius: 20,
+    backgroundColor: '#1a1a1a',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#2a2a2a',
   },
   seeMoreCardText: {
     color: '#fff',
