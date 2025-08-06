@@ -3,10 +3,11 @@ import { SessionCard } from '@/components/ui/SessionCard';
 import { SessionCardSkeleton } from '@/components/ui/SkeletonCards';
 import { useFavorites } from '@/src/hooks/useFavorites';
 import { useSessionCompletion } from '@/src/hooks/useSessionCompletion';
+import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { Heart } from 'phosphor-react-native';
-import React, { useMemo } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useMemo } from 'react';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const baseFontSize = 16;
@@ -14,7 +15,8 @@ const rem = (size: number) => size * baseFontSize;
 
 export default function FavoritesScreen() {
   const router = useRouter();
-  const { favorites, loading: favoritesLoading } = useFavorites();
+  const isFocused = useIsFocused();
+  const { favorites, loading: favoritesLoading, removeFavorite, refetch } = useFavorites();
 
   // Get session IDs for completion tracking
   const sessionIds = useMemo(() => {
@@ -46,6 +48,32 @@ export default function FavoritesScreen() {
     });
   };
 
+  const handleRemoveFavorite = (favorite: any) => {
+    Alert.alert(
+      'Remove from Favorites',
+      'Are you sure you want to remove this session from your favorites?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => removeFavorite(favorite.session_id),
+        },
+      ]
+    );
+  };
+
+  // Refresh favorites when screen comes into focus
+  useEffect(() => {
+    if (isFocused) {
+      console.log('🔄 Favorites screen focused, refreshing data');
+      refetch();
+    }
+  }, [isFocused, refetch]);
+
   return (
     <Background>
       <SafeAreaView style={styles.safeArea}>
@@ -76,16 +104,17 @@ export default function FavoritesScreen() {
                 const completion = getSessionCompletion(favorite.session_id);
                 
                 return (
-                  <TouchableOpacity
+                  <SessionCard
                     key={favorite.id}
+                    title={favorite.title || 'Unknown Session'}
+                    subtitle={favorite.course_title || 'Unknown Course'}
+                    completionStatus={completion.status}
+                    hideCompletionIcon={true}
+                    showHeartIcon={true}
+                    isFavorited={true}
+                    onHeartPress={() => handleRemoveFavorite(favorite)}
                     onPress={() => handleSessionPress(favorite)}
-                  >
-                    <SessionCard
-                      title={favorite.title}
-                      subtitle={favorite.course_title}
-                      completionStatus={completion.status}
-                    />
-                  </TouchableOpacity>
+                  />
                 );
               })}
             </View>

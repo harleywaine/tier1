@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
   },
   collectionTitle: {
     color: '#fff',
-    fontWeight: '400',
+    fontWeight: '700',
     fontSize: 20,
     marginBottom: 2,
   },

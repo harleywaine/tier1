@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export interface Favorite {
   id: string;
@@ -16,7 +16,7 @@ export function useFavorites() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchFavorites = async () => {
+  const fetchFavorites = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       console.log('👤 Current user:', user?.id);
@@ -109,7 +109,7 @@ export function useFavorites() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const addFavorite = async (sessionId: string) => {
     try {
@@ -159,7 +159,7 @@ export function useFavorites() {
 
   useEffect(() => {
     fetchFavorites();
-  }, []);
+  }, [fetchFavorites]);
 
   return {
     favorites,

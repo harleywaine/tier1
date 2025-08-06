@@ -1,4 +1,4 @@
-import { CheckCircle } from 'phosphor-react-native';
+import { CheckCircle, Heart } from 'phosphor-react-native';
 import React from 'react';
 import {
     StyleSheet,
@@ -23,6 +23,10 @@ interface SessionCardProps {
   showBookmark?: boolean;
   style?: ViewStyle;
   completionStatus?: 'not_started' | 'started' | 'completed';
+  hideCompletionIcon?: boolean;
+  showHeartIcon?: boolean;
+  isFavorited?: boolean;
+  onHeartPress?: () => void;
 }
 
 export const SessionCard = ({
@@ -39,6 +43,10 @@ export const SessionCard = ({
   showBookmark,
   style,
   completionStatus = 'not_started',
+  hideCompletionIcon = false,
+  showHeartIcon = false,
+  isFavorited = false,
+  onHeartPress,
 }: SessionCardProps) => {
   console.log(`🎯 SessionCard "${title}" completionStatus:`, completionStatus);
   
@@ -109,15 +117,28 @@ export const SessionCard = ({
         {duration && !compact && !large && (
           <Text style={styles.sessionCardDuration}>{duration}</Text>
         )}
-        {completionStatus === 'started' && !large && (
+        {!hideCompletionIcon && completionStatus === 'started' && !large && (
           <View style={styles.completionIcon}>
             <CheckCircle size={20} color="rgba(255, 255, 255, 0.6)" weight="light" />
           </View>
         )}
-        {completionStatus === 'completed' && !large && (
+        {!hideCompletionIcon && completionStatus === 'completed' && !large && (
           <View style={styles.completionIcon}>
             <CheckCircle size={20} color="#22c55e" weight="fill" />
           </View>
+        )}
+        {showHeartIcon && !large && (
+          <TouchableOpacity 
+            style={styles.heartIcon} 
+            onPress={onHeartPress}
+            activeOpacity={0.7}
+          >
+            <Heart 
+              size={20} 
+              color="#ffffff" 
+              weight={isFavorited ? "fill" : "light"} 
+            />
+          </TouchableOpacity>
         )}
       </View>
 
@@ -151,8 +172,8 @@ const styles = StyleSheet.create({
   sessionCardContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 32,
-    paddingBottom: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 18,
     height: '100%',
     justifyContent: 'center',
   },
@@ -224,6 +245,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#01b4d4',
   },
   completionIcon: {
+    position: 'absolute',
+    top: 0,
+    right: 10,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  heartIcon: {
     position: 'absolute',
     top: 0,
     right: 10,
