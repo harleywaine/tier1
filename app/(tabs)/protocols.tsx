@@ -5,8 +5,9 @@ import { CollectionCardSkeleton } from '@/components/ui/SkeletonCards';
 import { getThemeConfig } from '@/constants/ThemeColors';
 import { useData } from '@/src/contexts/DataContext';
 import { useCourseCompletion } from '@/src/hooks/useCourseCompletion';
+import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -15,14 +16,33 @@ const rem = (size: number) => size * baseFontSize;
 
 export default function ExploreScreen() {
   const router = useRouter();
+  const isFocused = useIsFocused();
   const { courses, coursesLoading } = useData();
+  
+  // Cache last fetch time to prevent excessive refetching
+  const lastFetchTime = useRef<number>(0);
+  const CACHE_DURATION = 30000; // 30 seconds
   
   // Get course IDs for completion tracking
   const courseIds = useMemo(() => {
     return courses.map(course => course.id);
   }, [courses]);
   
-  const { getCourseCompletion, loading: completionLoading } = useCourseCompletion(courseIds);
+  const { getCourseCompletion, loading: completionLoading, refresh } = useCourseCompletion(courseIds);
+
+  // Refresh completion data when screen comes into focus
+  useEffect(() => {
+    if (isFocused) {
+      const now = Date.now();
+      const timeSinceLastFetch = now - lastFetchTime.current;
+      
+      // Only refetch if cache is stale or we have no data
+      if (timeSinceLastFetch > CACHE_DURATION || courseIds.length === 0) {
+        lastFetchTime.current = now;
+        refresh();
+      }
+    }
+  }, [isFocused, courseIds.length]); // Removed refresh from dependencies
 
   // Group courses by theme
   const groupedCourses = useMemo(() => {
@@ -93,7 +113,6 @@ export default function ExploreScreen() {
                     <CollectionCard
                       key={course.id}
                       title={course.title}
-                      sessions={course.sessionCount ?? 0}
                       color={course.theme?.name ? getThemeConfig(course.theme.name)?.colors : undefined}
                       disabled={course.disabled}
                       fullWidth
@@ -116,12 +135,12 @@ export default function ExploreScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#070708',
   },
   container: {
     flex: 1,
     padding: 8.5,
-    backgroundColor: '#000',
+    backgroundColor: '#070708',
   },
   header: {
     marginBottom: 40,

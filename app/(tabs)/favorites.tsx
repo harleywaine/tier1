@@ -5,8 +5,7 @@ import { useFavorites } from '@/src/hooks/useFavorites';
 import { useSessionCompletion } from '@/src/hooks/useSessionCompletion';
 import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { Heart } from 'phosphor-react-native';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -17,6 +16,10 @@ export default function FavoritesScreen() {
   const router = useRouter();
   const isFocused = useIsFocused();
   const { favorites, loading: favoritesLoading, removeFavorite, refetch } = useFavorites();
+  
+  // Cache last fetch time to prevent excessive refetching
+  const lastFetchTime = useRef<number>(0);
+  const CACHE_DURATION = 30000; // 30 seconds
 
   // Get session IDs for completion tracking
   const sessionIds = useMemo(() => {
@@ -64,12 +67,19 @@ export default function FavoritesScreen() {
     );
   };
 
-  // Refresh favorites when screen comes into focus
+  // Optimized focus effect - only refetch if cache is stale
   useEffect(() => {
     if (isFocused) {
-      refetch();
+      const now = Date.now();
+      const timeSinceLastFetch = now - lastFetchTime.current;
+      
+      // Only refetch if cache is stale or we have no data
+      if (timeSinceLastFetch > CACHE_DURATION || favorites.length === 0) {
+        lastFetchTime.current = now;
+        refetch();
+      }
     }
-  }, [isFocused, refetch]);
+  }, [isFocused, favorites.length]); // Removed refetch from dependencies
 
   return (
     <Background>
@@ -118,7 +128,6 @@ export default function FavoritesScreen() {
           ) : (
             // Show empty state
             <View style={styles.emptyState}>
-              <Heart size={64} color="#666" weight="light" />
               <Text style={styles.emptyTitle}>No favorites yet</Text>
               <Text style={styles.emptySubtitle}>
                 Tap the heart icon when playing a session to add it to your favourites
@@ -134,12 +143,12 @@ export default function FavoritesScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#070708',
   },
   container: {
     flex: 1,
     padding: 8.5,
-    backgroundColor: '#000',
+    backgroundColor: '#070708',
   },
   header: {
     flexDirection: 'row',

@@ -1,15 +1,16 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, ViewStyle } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
 
 interface GradientButtonProps {
   title: string;
   onPress?: () => void;
   style?: ViewStyle;
   disabled?: boolean;
+  icon?: React.ReactNode;
 }
 
-export const GradientButton = ({ title, onPress, style, disabled }: GradientButtonProps) => (
+export const GradientButton = ({ title, onPress, style, disabled, icon }: GradientButtonProps) => (
   <TouchableOpacity
     onPress={onPress}
     activeOpacity={0.8}
@@ -22,7 +23,10 @@ export const GradientButton = ({ title, onPress, style, disabled }: GradientButt
       end={{ x: 1, y: 0 }}
       style={[styles.gradientButton, disabled && styles.disabledButton]}
     >
-      <Text style={[styles.gradientButtonText, disabled && styles.disabledText]}>{title}</Text>
+      <View style={styles.buttonContent}>
+        {icon && <View style={styles.iconContainer}>{icon}</View>}
+        <Text style={[styles.gradientButtonText, disabled && styles.disabledText]}>{title}</Text>
+      </View>
     </LinearGradient>
   </TouchableOpacity>
 );
@@ -39,6 +43,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 14,
     width: '100%',
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconContainer: {
+    marginRight: 8,
   },
   gradientButtonText: {
     color: '#fff',

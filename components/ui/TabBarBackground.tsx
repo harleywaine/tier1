@@ -1,17 +1,20 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // This is a shim for web and Android where the tab bar is generally opaque.
 export default function TabBarBackground() {
-  return <View style={styles.background} />;
+  const insets = useSafeAreaInsets();
+  
+  return <View style={[styles.background, { paddingBottom: insets.bottom }]} />;
 }
 
 const styles = StyleSheet.create({
   background: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.22)',
-    height: 80,
-    paddingTop: 18,
+    backgroundColor: '#000000',
+    height: 95,
+    paddingTop: 25,
   },
 });
 

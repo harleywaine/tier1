@@ -6,6 +6,7 @@ import { ArcCardSkeleton, SwitchCardSkeleton } from '@/components/ui/SkeletonCar
 import { SwitchCard } from '@/components/ui/SwitchCard';
 import { useData } from '@/src/contexts/DataContext';
 import { useRouter } from 'expo-router';
+import { Play } from 'phosphor-react-native';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, FlatList, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { supabase } from '../../lib/supabase';
@@ -52,19 +53,16 @@ export default function HomeScreen() {
             description={arc.description}
           >
             <GradientButton
-              title={historyLoading ? "Loading..." : (lastPlayedSession ? "Continue" : "Get Started")}
+              title={historyLoading ? "Loading..." : (lastPlayedSession ? "Continue Listening" : "Get Started")}
+              icon={lastPlayedSession && !historyLoading ? <Play size={20} color="#fff" weight="fill" /> : undefined}
               onPress={() => {
                 if (lastPlayedSession) {
-                  // Navigate to the last played session
-                  const encodedUrl = encodeURIComponent(lastPlayedSession.audio_url);
+                  // Navigate to the course collection page
                   router.push({
-                    pathname: '/play',
-                    params: {
-                      audioUrl: encodedUrl,
-                      title: lastPlayedSession.title,
-                      author: lastPlayedSession.course_title || 'Course Session',
-                      imageUrl: '',
-                      sessionId: lastPlayedSession.session_id,
+                    pathname: '/collection',
+                    params: { 
+                      courseId: lastPlayedSession.course_id || 'default-course-id', 
+                      title: lastPlayedSession.course_title || 'Course Collection' 
                     },
                   });
                 } else {
@@ -237,12 +235,12 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#070708',
   },
   container: {
     flex: 1,
     padding: 8.5,
-    backgroundColor: '#000',
+    backgroundColor: '#070708',
   },
   header: {
     flexDirection: 'row',

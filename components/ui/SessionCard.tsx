@@ -170,11 +170,11 @@ export const SessionCard: React.FC<SessionCardProps> = ({
 
 const styles = StyleSheet.create({
   sessionCard: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#2C2D30',
     borderRadius: 8,
     padding: 0,
     borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderColor: '#3C3D40',
     height: 90,
   },
   sessionCardLarge: {

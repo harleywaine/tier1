@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import {
     Alert,
     Dimensions,
+    Image,
     Keyboard,
     KeyboardAvoidingView,
     Platform,
@@ -14,7 +15,7 @@ import {
     Text,
     TextInput,
     TouchableWithoutFeedback,
-    View
+    View,
 } from 'react-native';
 import { supabase } from '../../lib/supabase';
 
@@ -92,7 +93,11 @@ export default function UpdatePassword() {
         <SafeAreaView style={styles.safeArea}>
           <View style={styles.container}>
             <View style={styles.header}>
-              <Text style={styles.title}>TIER 1</Text>
+              <Image 
+                source={require('../../assets/images/TIER1.png')} 
+                style={styles.logo}
+                resizeMode="contain"
+              />
               <Text style={styles.subtitle}>Password Updated</Text>
             </View>
             <View style={styles.successContainer}>
@@ -122,7 +127,11 @@ export default function UpdatePassword() {
             <SafeAreaView style={styles.safeArea}>
               <View style={styles.container}>
                 <View style={styles.header}>
-                  <Text style={styles.title}>TIER 1</Text>
+                  <Image 
+                    source={require('../../assets/images/TIER1.png')} 
+                    style={styles.logo}
+                    resizeMode="contain"
+                  />
                   <Text style={styles.subtitle}>Set New Password</Text>
                 </View>
                 <View style={styles.form}>
@@ -174,11 +183,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: rem(3),
   },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#fff',
-    marginBottom: 8,
+  logo: {
+    width: 120,
+    height: 40,
+    marginBottom: rem(0.5),
   },
   subtitle: {
     fontSize: 18,

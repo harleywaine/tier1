@@ -3,19 +3,20 @@ import { GradientButton } from '@/components/ui/GradientButton';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-  Alert,
-  Dimensions,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
+    Alert,
+    Dimensions,
+    Image,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View,
 } from 'react-native';
 import { supabase } from '../../lib/supabase';
 
@@ -81,7 +82,11 @@ export default function SignUp() {
             <SafeAreaView style={styles.safeArea}>
               <View style={styles.container}>
                 <View style={styles.header}>
-                  <Text style={styles.title}>TIER 1</Text>
+                  <Image 
+                    source={require('../../assets/images/TIER1.png')} 
+                    style={styles.logo}
+                    resizeMode="contain"
+                  />
                   <Text style={styles.subtitle}>Create Account</Text>
                 </View>
                 <View style={styles.form}>
@@ -152,12 +157,10 @@ const styles = StyleSheet.create({
     marginBottom: rem(1),
     alignItems: 'center',
   },
-  title: {
-    fontSize: rem(2),
-    fontFamily: 'SFProDisplay-Bold',
-    color: '#fff',
-    letterSpacing: 2,
-    textAlign: 'center',
+  logo: {
+    width: 120,
+    height: 40,
+    marginBottom: rem(0.5),
   },
   subtitle: {
     fontSize: rem(1.25),

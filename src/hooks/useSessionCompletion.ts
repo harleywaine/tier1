@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 export interface SessionCompletion {
   session_id: string;
@@ -11,11 +11,33 @@ export function useSessionCompletion(sessionIds: string[]) {
   const [completionData, setCompletionData] = useState<Record<string, SessionCompletion>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Cache for preventing unnecessary refetches
+  const lastSessionIdsRef = useRef<string[]>([]);
+  const lastFetchTimeRef = useRef<number>(0);
+  const completionDataRef = useRef<Record<string, SessionCompletion>>({});
+  const CACHE_DURATION = 30000; // 30 seconds
+
+  // Memoize session IDs to prevent unnecessary re-renders
+  const memoizedSessionIds = useMemo(() => {
+    const sortedIds = [...sessionIds].sort();
+    return sortedIds;
+  }, [sessionIds]);
 
   const fetchCompletionData = useCallback(async () => {
-    if (sessionIds.length === 0) {
+    if (memoizedSessionIds.length === 0) {
       setCompletionData({});
       setLoading(false);
+      return;
+    }
+
+    // Check if session IDs have changed or cache is stale
+    const now = Date.now();
+    const sessionIdsChanged = JSON.stringify(memoizedSessionIds) !== JSON.stringify(lastSessionIdsRef.current);
+    const cacheStale = now - lastFetchTimeRef.current > CACHE_DURATION;
+    
+    if (!sessionIdsChanged && !cacheStale && Object.keys(completionDataRef.current).length > 0) {
+      // No need to refetch
       return;
     }
 
@@ -27,7 +49,7 @@ export function useSessionCompletion(sessionIds: string[]) {
       if (!user) {
         // If no user, all sessions are not started
         const notStartedData: Record<string, SessionCompletion> = {};
-        sessionIds.forEach(id => {
+        memoizedSessionIds.forEach(id => {
           notStartedData[id] = {
             session_id: id,
             status: 'not_started',
@@ -35,6 +57,9 @@ export function useSessionCompletion(sessionIds: string[]) {
           };
         });
         setCompletionData(notStartedData);
+        completionDataRef.current = notStartedData;
+        lastSessionIdsRef.current = memoizedSessionIds;
+        lastFetchTimeRef.current = now;
         return;
       }
 
@@ -43,7 +68,7 @@ export function useSessionCompletion(sessionIds: string[]) {
         .from('user_play_history')
         .select('session_id, status, progress_percentage')
         .eq('user_id', user.id)
-        .in('session_id', sessionIds);
+        .in('session_id', memoizedSessionIds);
 
       if (historyError) {
         console.error('Error fetching session completion:', historyError);
@@ -55,7 +80,7 @@ export function useSessionCompletion(sessionIds: string[]) {
       const completionMap: Record<string, SessionCompletion> = {};
       
       // Initialize all sessions as not started
-      sessionIds.forEach(id => {
+      memoizedSessionIds.forEach(id => {
         completionMap[id] = {
           session_id: id,
           status: 'not_started',
@@ -73,6 +98,9 @@ export function useSessionCompletion(sessionIds: string[]) {
       });
 
       setCompletionData(completionMap);
+      completionDataRef.current = completionMap;
+      lastSessionIdsRef.current = memoizedSessionIds;
+      lastFetchTimeRef.current = now;
 
     } catch (err) {
       console.error('Error in fetchCompletionData:', err);
@@ -80,26 +108,31 @@ export function useSessionCompletion(sessionIds: string[]) {
     } finally {
       setLoading(false);
     }
-  }, [sessionIds]);
+  }, [memoizedSessionIds]); // Removed completionData from dependencies
 
   useEffect(() => {
     fetchCompletionData();
   }, [fetchCompletionData]);
 
-  const getSessionCompletion = (sessionId: string): SessionCompletion => {
+  const getSessionCompletion = useCallback((sessionId: string): SessionCompletion => {
     const result = completionData[sessionId] || {
       session_id: sessionId,
       status: 'not_started',
       progress_percentage: 0,
     };
     return result;
-  };
+  }, [completionData]);
+
+  const refresh = useCallback(() => {
+    lastFetchTimeRef.current = 0; // Force refresh by resetting cache time
+    fetchCompletionData();
+  }, [fetchCompletionData]);
 
   return {
     completionData,
     loading,
     error,
     getSessionCompletion,
-    refresh: fetchCompletionData,
+    refresh,
   };
 } 

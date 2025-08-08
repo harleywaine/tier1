@@ -185,7 +185,7 @@ export function useUserPlayHistory() {
         return;
       }
 
-      const status = progressPercentage >= 100 ? 'completed' : 'started';
+      const status = progressPercentage >= 95 ? 'completed' : 'started';
 
       const { error: updateError } = await supabase
         .from('user_play_history')

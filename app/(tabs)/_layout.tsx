@@ -1,7 +1,8 @@
 import { Tabs } from 'expo-router';
-import { Heart, House, SquaresFour, User } from 'phosphor-react-native';
+import { House, List, SquaresFour, User } from 'phosphor-react-native';
 import React from 'react';
-import { Platform, View } from 'react-native';
+import { Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HapticTab } from '@/components/HapticTab';
 import TabBarBackground from '@/components/ui/TabBarBackground';
@@ -10,6 +11,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
@@ -20,50 +22,47 @@ export default function TabLayout() {
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
           ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-            height: 80,
-            paddingTop: 18,
+            // Remove absolute positioning to allow natural height
+            height: 95,
+            paddingTop: 25,
+            paddingBottom: insets.bottom,
           },
           default: {
-            height: 80,
-            paddingTop: 18,
+            height: 95,
+            paddingTop: 25,
+            paddingBottom: insets.bottom,
           },
         }),
         tabBarIconStyle: {
-          marginTop: -12,
+          marginTop: -18,
         },
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <House size={24} color={color} />,
+          tabBarIcon: ({ color }) => <House size={24} color={color} weight="fill" />,
         }}
       />
       <Tabs.Screen
         name="protocols"
         options={{
           title: 'Protocols',
-          tabBarIcon: ({ color }) => <SquaresFour size={24} color={color} />,
+          tabBarIcon: ({ color }) => <SquaresFour size={24} color={color} weight="fill" />,
         }}
       />
       <Tabs.Screen
         name="favorites"
         options={{
           title: 'Favorites',
-          tabBarIcon: ({ color }) => <Heart size={24} color={color} />,
+          tabBarIcon: ({ color }) => <List size={24} color={color} weight="fill" />,
         }}
       />
       <Tabs.Screen
         name="account"
         options={{
           title: 'Account',
-          tabBarIcon: ({ color }) => (
-            <View style={{ marginTop: -6 }}>
-              <User size={28} color={color} weight="light" />
-            </View>
-          ),
+          tabBarIcon: ({ color }) => <User size={24} color={color} weight="fill" />,
         }}
       />
     </Tabs>

@@ -187,7 +187,7 @@ export default function AccountScreen() {
               <Text style={styles.label}>First Name</Text>
               {isEditing ? (
                 <TextInput
-                  style={styles.input}
+                  style={styles.fieldInput}
                   value={firstName}
                   onChangeText={setFirstName}
                   placeholder="Enter first name"
@@ -202,7 +202,7 @@ export default function AccountScreen() {
               <Text style={styles.label}>Last Name</Text>
               {isEditing ? (
                 <TextInput
-                  style={styles.input}
+                  style={styles.fieldInput}
                   value={lastName}
                   onChangeText={setLastName}
                   placeholder="Enter last name"
@@ -290,7 +290,7 @@ export default function AccountScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#070708',
   },
   keyboardAvoidingView: {
     flex: 1,
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 8.5,
-    backgroundColor: '#000',
+    backgroundColor: '#070708',
   },
   content: {
     flex: 1,
@@ -382,14 +382,40 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'SFProDisplay-Regular',
   },
-  input: {
+  fieldInput: {
+    backgroundColor: '#2C2D30',
+    borderRadius: 8,
+    padding: 16,
+    fontSize: 16,
     color: '#fff',
-    fontSize: 18,
-    fontFamily: 'SFProDisplay-Light',
-    borderBottomWidth: 1,
-    borderBottomColor: '#333',
-    paddingBottom: 5,
-    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#3C3D40',
+  },
+  fieldInputDisabled: {
+    backgroundColor: '#1C1F29',
+    color: '#666',
+    borderColor: '#2A2D3D',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 12,
+  },
+  button: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  editButton: {
+    backgroundColor: '#3C3D40',
+  },
+  saveButton: {
+    backgroundColor: '#4A6B99',
+  },
+  cancelButton: {
+    backgroundColor: '#6B4A4A',
   },
   settingItem: {
     flexDirection: 'row',

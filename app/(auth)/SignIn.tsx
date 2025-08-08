@@ -5,6 +5,7 @@ import { useState } from 'react';
 import {
     Alert,
     Dimensions,
+    Image,
     Keyboard,
     KeyboardAvoidingView,
     Platform,
@@ -57,7 +58,11 @@ export default function SignIn() {
             <SafeAreaView style={styles.safeArea}>
               <View style={styles.container}>
                 <View style={styles.header}>
-                  <Text style={styles.title}>TIER 1</Text>
+                  <Image 
+                    source={require('../../assets/images/TIER1.png')} 
+                    style={styles.logo}
+                    resizeMode="contain"
+                  />
                   <Text style={styles.subtitle}>Sign In</Text>
                 </View>
                 <View style={styles.form}>
@@ -113,12 +118,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: rem(1.5),
     alignItems: 'center',
   },
-  title: {
-    fontSize: rem(2),
-    fontFamily: 'SFProDisplay-Bold',
-    color: '#fff',
-    letterSpacing: 2,
-    textAlign: 'center',
+  logo: {
+    width: 120,
+    height: 40,
+    marginBottom: rem(0.5),
   },
   subtitle: {
     fontSize: rem(1.25),

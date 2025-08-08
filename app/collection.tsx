@@ -8,7 +8,7 @@ import { useSessionsByCourseTitle } from '@/src/hooks/useSessionsByCourseTitle';
 import { useIsFocused } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft } from 'phosphor-react-native';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -16,6 +16,10 @@ export default function CollectionScreen() {
   const router = useRouter();
   const { courseId, title } = useLocalSearchParams<{ courseId: string; title: string }>();
   const isFocused = useIsFocused();
+  
+  // Cache last fetch time to prevent excessive refetching
+  const lastFetchTime = useRef<number>(0);
+  const CACHE_DURATION = 30000; // 30 seconds
   
   const { courses, coursesLoading } = useData();
   const { course: courseData, maintenance, basic, loading: sessionsLoading } = useSessionsByCourseTitle(title || '');
@@ -38,12 +42,19 @@ export default function CollectionScreen() {
 
   const { getSessionCompletion, refresh } = useSessionCompletion(allSessionIds);
 
-  // Refresh completion data when screen comes into focus
+  // Optimized focus effect - only refetch if cache is stale
   useEffect(() => {
     if (isFocused) {
-      refresh();
+      const now = Date.now();
+      const timeSinceLastFetch = now - lastFetchTime.current;
+      
+      // Only refetch if cache is stale or we have no data
+      if (timeSinceLastFetch > CACHE_DURATION || allSessionIds.length === 0) {
+        lastFetchTime.current = now;
+        refresh();
+      }
     }
-  }, [isFocused, refresh]);
+  }, [isFocused, allSessionIds.length]); // Removed refresh from dependencies
 
   // Check if data is loading
   const isLoading = coursesLoading || sessionsLoading;
@@ -76,14 +87,20 @@ export default function CollectionScreen() {
         <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
           {/* Hero Section */}
           <ImageBackground
-            source={require('@/assets/images/Index-bg.jpg')}
+            source={courseData?.hero_image_url ? { uri: courseData.hero_image_url } : require('@/assets/images/Index-bg.jpg')}
             style={styles.heroSection}
-            imageStyle={{ opacity: 0.5 }}
+            imageStyle={{ opacity: 1.0 }}
           >
-            <View style={styles.heroContent}>
-              <Text style={styles.heroTitle}>{title}</Text>
-            </View>
+            {/* Removed the dark overlay to show image at full opacity */}
           </ImageBackground>
+
+          {/* Title and Description below image */}
+          <View style={styles.titleSection}>
+            <Text style={styles.heroTitle}>{title}</Text>
+            {courseData?.description && (
+              <Text style={styles.heroDescription}>{courseData.description}</Text>
+            )}
+          </View>
 
           {/* Back Button */}
           <TouchableOpacity
@@ -125,7 +142,6 @@ export default function CollectionScreen() {
                         <SessionCard
                           key={session.id}
                           title={session.title}
-                          subtitle={`Lesson ${session.position}`}
                           completionStatus={completion.status}
                           onPress={() => handlePress(session)}
                         />
@@ -147,7 +163,6 @@ export default function CollectionScreen() {
                         <SessionCard
                           key={session.id}
                           title={session.title}
-                          subtitle={`Lesson ${session.position}`}
                           completionStatus={completion.status}
                           onPress={() => handlePress(session)}
                         />
@@ -165,7 +180,10 @@ export default function CollectionScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#000' },
+  safeArea: { 
+    flex: 1, 
+    backgroundColor: '#070708' 
+  },
   scrollContainer: { paddingBottom: 40 },
   title: { fontSize: 28, fontWeight: '400', color: '#fff', marginBottom: 20 },
   description: { fontSize: 16, color: '#aaa', marginBottom: 20 },
@@ -196,18 +214,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'transparent',
   },
-  heroContent: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    borderRadius: 0,
-    padding: 20,
-    justifyContent: 'flex-end',
-    alignItems: 'flex-start',
-  },
+
   heroTitle: {
     fontSize: 28,
     fontWeight: 'bold',
@@ -217,8 +224,13 @@ const styles = StyleSheet.create({
   },
   heroDescription: {
     fontSize: 16,
-    color: '#fff',
+    color: '#aaa',
     textAlign: 'left',
+    lineHeight: 22,
+  },
+  titleSection: {
+    paddingHorizontal: 17,
+    marginBottom: 20,
   },
 });
 

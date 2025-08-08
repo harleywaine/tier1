@@ -6,7 +6,7 @@ import * as Progress from 'react-native-progress';
 interface CollectionCardProps {
   icon?: React.ComponentType<any>;
   title: string;
-  sessions: number;
+  sessions?: number;
   color?: string[];
   fullWidth?: boolean;
   hideIcon?: boolean;
@@ -67,12 +67,14 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
           styles.collectionTitle,
           disabled && styles.collectionTitleDisabled
         ]}>{title}</Text>
-        <Text style={[
-          styles.collectionSubtitle,
-          disabled && styles.collectionSubtitleDisabled
-        ]}>
-          {sessions} sessions
-        </Text>
+        {sessions !== undefined && (
+          <Text style={[
+            styles.collectionSubtitle,
+            disabled && styles.collectionSubtitleDisabled
+          ]}>
+            {sessions} sessions
+          </Text>
+        )}
       </View>
       
       {disabled && (
@@ -88,10 +90,10 @@ const styles = StyleSheet.create({
   collectionCard: {
     width: 240,
     height: 100,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#2C2D30',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderColor: '#3C3D40',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 24,
