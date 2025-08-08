@@ -32,8 +32,6 @@ export default function FavoritesScreen() {
   // Skeleton arrays for loading states
   const sessionSkeletons = Array(6).fill(null);
 
-  console.log('🔍 Favorites screen state:', { isLoading, favoritesCount: favorites.length, favorites });
-
   const handleSessionPress = (session: any) => {
     const encodedUrl = encodeURIComponent(session.audio_url);
     router.push({
@@ -69,7 +67,6 @@ export default function FavoritesScreen() {
   // Refresh favorites when screen comes into focus
   useEffect(() => {
     if (isFocused) {
-      console.log('🔄 Favorites screen focused, refreshing data');
       refetch();
     }
   }, [isFocused, refetch]);
@@ -141,7 +138,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 17,
+    padding: 8.5,
     backgroundColor: '#000',
   },
   header: {

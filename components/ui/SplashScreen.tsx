@@ -1,10 +1,14 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 
-export const SplashScreen = () => {
+export const SplashScreen: React.FC = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.quote}>Accelerate your Excellence</Text>
+      <Image 
+        source={require('../../assets/images/TIER1.png')} 
+        style={styles.logo}
+        resizeMode="contain"
+      />
     </View>
   );
 };
@@ -15,13 +19,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 40,
   },
-  quote: {
-    fontSize: 32,
-    fontFamily: 'SFProDisplay-Bold',
-    color: '#fff',
-    textAlign: 'center',
-    lineHeight: 40,
+  logo: {
+    width: 200,
+    height: 200,
   },
 }); 

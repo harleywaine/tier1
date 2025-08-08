@@ -55,16 +55,12 @@ export function useCourseCompletion(courseIds: string[]) {
         return;
       }
 
-      console.log('📊 Raw sessions data:', sessionsData);
-
       // Get completion data for all sessions
       const allSessionIds: string[] = [];
       const courseSessionMap: Record<string, string[]> = {};
 
       sessionsData?.forEach(course => {
         const courseSessions: string[] = [];
-        
-        console.log(`📊 Course ${course.id} basic training sessions:`, course.basic_training_sessions);
         
         // Add only basic training sessions
         if (course.basic_training_sessions && Array.isArray(course.basic_training_sessions)) {
@@ -75,7 +71,6 @@ export function useCourseCompletion(courseIds: string[]) {
         }
         
         courseSessionMap[course.id] = courseSessions;
-        console.log(`📊 Course ${course.id} basic training sessions count:`, courseSessions.length);
       });
 
       // Get completion data for all sessions
@@ -98,9 +93,6 @@ export function useCourseCompletion(courseIds: string[]) {
           .map(record => record.session_id) || []
       );
 
-      console.log('📊 Completed session IDs:', Array.from(completedSessionIds));
-      console.log('📊 All history data:', historyData);
-
       // Calculate completion for each course
       const completionMap: Record<string, CourseCompletion> = {};
       
@@ -117,16 +109,8 @@ export function useCourseCompletion(courseIds: string[]) {
           totalSessions,
           completionPercentage: totalSessions > 0 ? (completedSessions / totalSessions) * 100 : 0,
         };
-        
-        console.log(`📊 Course ${courseId} completion:`, {
-          completedSessions,
-          totalSessions,
-          percentage: totalSessions > 0 ? (completedSessions / totalSessions) * 100 : 0,
-          courseSessions: courseSessionMap[courseId]
-        });
       });
 
-      console.log('📊 Course completion data:', completionMap);
       setCompletionData(completionMap);
 
     } catch (err) {

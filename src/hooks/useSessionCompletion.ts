@@ -45,20 +45,6 @@ export function useSessionCompletion(sessionIds: string[]) {
         .eq('user_id', user.id)
         .in('session_id', sessionIds);
 
-      console.log('📊 Raw history data from database:', historyData);
-      console.log('📊 History error:', historyError);
-      console.log('📊 User ID being queried:', user.id);
-      console.log('📊 Session IDs being queried:', sessionIds);
-
-      // Test query to see if we can read any records at all
-      const { data: allRecords, error: allRecordsError } = await supabase
-        .from('user_play_history')
-        .select('*')
-        .eq('user_id', user.id);
-
-      console.log('📊 All records for user:', allRecords);
-      console.log('📊 All records error:', allRecordsError);
-
       if (historyError) {
         console.error('Error fetching session completion:', historyError);
         setError(historyError.message);
@@ -86,7 +72,6 @@ export function useSessionCompletion(sessionIds: string[]) {
         };
       });
 
-      console.log('📊 Completion data fetched:', completionMap);
       setCompletionData(completionMap);
 
     } catch (err) {
@@ -101,15 +86,12 @@ export function useSessionCompletion(sessionIds: string[]) {
     fetchCompletionData();
   }, [fetchCompletionData]);
 
-
-
   const getSessionCompletion = (sessionId: string): SessionCompletion => {
     const result = completionData[sessionId] || {
       session_id: sessionId,
       status: 'not_started',
       progress_percentage: 0,
     };
-    console.log(`📊 getSessionCompletion for ${sessionId}:`, result);
     return result;
   };
 

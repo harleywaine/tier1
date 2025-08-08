@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Compass, Heart, House, User } from 'phosphor-react-native';
+import { Heart, House, SquaresFour, User } from 'phosphor-react-native';
 import React from 'react';
 import { Platform, View } from 'react-native';
 
@@ -45,7 +45,7 @@ export default function TabLayout() {
         name="protocols"
         options={{
           title: 'Protocols',
-          tabBarIcon: ({ color }) => <Compass size={24} color={color} />,
+          tabBarIcon: ({ color }) => <SquaresFour size={24} color={color} />,
         }}
       />
       <Tabs.Screen

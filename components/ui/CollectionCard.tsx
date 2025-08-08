@@ -1,6 +1,6 @@
 import { Lock } from 'phosphor-react-native';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import * as Progress from 'react-native-progress';
 
 interface CollectionCardProps {
@@ -14,19 +14,36 @@ interface CollectionCardProps {
   completedSessions?: number;
   totalSessions?: number;
   showCompletion?: boolean;
+  onPress?: () => void;
 }
 
-export const CollectionCard = ({ icon: Icon, title, sessions, color, fullWidth, hideIcon, disabled, completedSessions, totalSessions, showCompletion }: CollectionCardProps) => {
+export const CollectionCard: React.FC<CollectionCardProps> = ({
+  icon: Icon,
+  title,
+  sessions,
+  color,
+  disabled = false,
+  onPress,
+  fullWidth = false,
+  hideIcon = false,
+  showCompletion = false,
+  completedSessions = 0,
+  totalSessions = 0,
+}) => {
+  const progress = totalSessions > 0 ? completedSessions / totalSessions : 0;
+  
   return (
-  <View style={[
-    styles.collectionCard,
-    fullWidth && styles.collectionCardFullWidth,
-    disabled && styles.collectionCardDisabled
-  ]}>
-    {showCompletion && completedSessions !== undefined && totalSessions !== undefined && totalSessions > 0 && (() => {
-      const progress = completedSessions / totalSessions;
-      console.log(`🎯 Progress for ${title}: ${completedSessions}/${totalSessions} = ${progress * 100}%`);
-      return (
+    <TouchableOpacity
+      style={[
+        styles.collectionCard,
+        fullWidth && styles.fullWidth,
+        disabled && styles.disabled,
+      ]}
+      onPress={onPress}
+      disabled={disabled}
+      activeOpacity={0.7}
+    >
+      {showCompletion && completedSessions !== undefined && totalSessions !== undefined && totalSessions > 0 && (
         <View style={styles.circularProgressContainer}>
           <Progress.Circle
             size={24}
@@ -39,32 +56,31 @@ export const CollectionCard = ({ icon: Icon, title, sessions, color, fullWidth, 
             thickness={2}
           />
         </View>
-      );
-    })()}
-    {Icon && !hideIcon ? (
-      <View style={styles.iconCircle}>
-        <Icon size={28} color={disabled ? "#666" : "#ffffff"} weight="light" />
+      )}
+      {Icon && !hideIcon ? (
+        <View style={styles.iconCircle}>
+          <Icon size={28} color={disabled ? "#666" : "#ffffff"} weight="light" />
+        </View>
+      ) : null}
+      <View style={styles.textContainer}>
+        <Text style={[
+          styles.collectionTitle,
+          disabled && styles.collectionTitleDisabled
+        ]}>{title}</Text>
+        <Text style={[
+          styles.collectionSubtitle,
+          disabled && styles.collectionSubtitleDisabled
+        ]}>
+          {sessions} sessions
+        </Text>
       </View>
-    ) : null}
-    <View style={styles.textContainer}>
-      <Text style={[
-        styles.collectionTitle,
-        disabled && styles.collectionTitleDisabled
-      ]}>{title}</Text>
-      <Text style={[
-        styles.collectionSubtitle,
-        disabled && styles.collectionSubtitleDisabled
-      ]}>
-        {sessions} sessions
-      </Text>
-          </View>
-    
-    {disabled && (
-      <View style={styles.lockOverlay}>
-        <Lock size={20} color="#ffffff" weight="light" />
-      </View>
-    )}
-  </View>
+      
+      {disabled && (
+        <View style={styles.lockOverlay}>
+          <Lock size={20} color="#ffffff" weight="light" />
+        </View>
+      )}
+    </TouchableOpacity>
   );
 };
 
@@ -82,8 +98,13 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     marginRight: 0,
   },
-  collectionCardFullWidth: {
+  fullWidth: {
     width: '100%',
+  },
+  disabled: {
+    opacity: 0.4,
+    backgroundColor: '#0a0a0a',
+    borderColor: '#333',
   },
   iconCircle: {
     width: 48,
@@ -108,11 +129,6 @@ const styles = StyleSheet.create({
   collectionSubtitle: {
     color: '#aaa',
     fontSize: 15,
-  },
-  collectionCardDisabled: {
-    opacity: 0.4,
-    backgroundColor: '#0a0a0a',
-    borderColor: '#333',
   },
   collectionTitleDisabled: {
     color: '#666',

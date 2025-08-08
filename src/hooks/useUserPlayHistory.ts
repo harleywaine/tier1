@@ -36,8 +36,6 @@ export function useUserPlayHistory() {
         setLastPlayedSession(null);
         return;
       }
-
-      console.log('🔍 Fetching play history for user:', user.id);
       
       // Get the most recent play history entry
       const { data: historyData, error: historyError } = await supabase
@@ -48,8 +46,6 @@ export function useUserPlayHistory() {
         .limit(1)
         .single();
 
-      console.log('🔍 Play history query result:', { historyData, historyError });
-
       if (historyError && historyError.code !== 'PGRST116') { // PGRST116 = no rows returned
         console.error('Error fetching play history:', historyError);
         setError(historyError.message);
@@ -57,12 +53,9 @@ export function useUserPlayHistory() {
       }
 
       if (!historyData) {
-        console.log('🔍 No play history found for user');
         setLastPlayedSession(null);
         return;
       }
-
-      console.log('🔍 Looking up session:', historyData.session_id);
       
       // Try to find the session in maintenance_sessions first
       let { data: sessionData, error: sessionError } = await supabase
@@ -107,16 +100,8 @@ export function useUserPlayHistory() {
         courseTitle = courseData?.title;
       }
 
-      console.log('🔍 Session lookup result:', { 
-        sessionData, 
-        sessionError,
-        courseTitle: sessionData?.courses?.title,
-        sessionId: sessionData?.id 
-      });
-
       if (sessionError || !sessionData) {
         // Session no longer exists, clean up the history entry
-        console.log('Session no longer exists, cleaning up history entry');
         await supabase
           .from('user_play_history')
           .delete()
@@ -137,7 +122,6 @@ export function useUserPlayHistory() {
         course_title: courseTitle,
       };
       
-      console.log('🔍 Setting last played session:', lastSession);
       setLastPlayedSession(lastSession);
 
     } catch (err) {
@@ -150,13 +134,10 @@ export function useUserPlayHistory() {
 
   const recordSessionStart = async (sessionId: string) => {
     try {
-      console.log('🎵 recordSessionStart called for sessionId:', sessionId);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        console.log('🎵 No user found, cannot record session start');
         return;
       }
-      console.log('🎵 User found:', user.id);
 
       // Check if we already have a record for this session
       const { data: existingRecord } = await supabase
@@ -165,8 +146,6 @@ export function useUserPlayHistory() {
         .eq('user_id', user.id)
         .eq('session_id', sessionId)
         .single();
-
-      console.log('🎵 Existing record check result:', existingRecord);
 
       if (existingRecord) {
         // Update existing record
@@ -179,7 +158,6 @@ export function useUserPlayHistory() {
           })
           .eq('id', existingRecord.id);
         
-        console.log('🎵 Update existing record result:', updateError ? 'Error: ' + updateError.message : 'Success');
       } else {
         // Create new record
         const { error: insertError } = await supabase
@@ -191,7 +169,6 @@ export function useUserPlayHistory() {
             progress_percentage: 0,
           });
         
-        console.log('🎵 Insert new record result:', insertError ? 'Error: ' + insertError.message : 'Success');
       }
 
       // Refresh the last played session
@@ -203,10 +180,8 @@ export function useUserPlayHistory() {
 
   const updateSessionProgress = async (sessionId: string, progressPercentage: number) => {
     try {
-      console.log('🎵 updateSessionProgress called for sessionId:', sessionId, 'progress:', progressPercentage);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        console.log('🎵 No user found, cannot update session progress');
         return;
       }
 
@@ -221,8 +196,6 @@ export function useUserPlayHistory() {
         })
         .eq('user_id', user.id)
         .eq('session_id', sessionId);
-
-      console.log('🎵 Update progress result:', updateError ? 'Error: ' + updateError.message : 'Success');
 
       // Refresh the last played session
       await fetchLastPlayedSession();

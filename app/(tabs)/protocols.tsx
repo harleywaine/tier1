@@ -3,11 +3,11 @@ import { CollectionCard } from '@/components/ui/CollectionCard';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { CollectionCardSkeleton } from '@/components/ui/SkeletonCards';
 import { getThemeConfig } from '@/constants/ThemeColors';
+import { useData } from '@/src/contexts/DataContext';
 import { useCourseCompletion } from '@/src/hooks/useCourseCompletion';
-import { useCourses } from '@/src/hooks/useCourses';
 import { useRouter } from 'expo-router';
 import React, { useMemo } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const baseFontSize = 16;
@@ -15,7 +15,7 @@ const rem = (size: number) => size * baseFontSize;
 
 export default function ExploreScreen() {
   const router = useRouter();
-  const { courses, loading: coursesLoading } = useCourses();
+  const { courses, coursesLoading } = useData();
   
   // Get course IDs for completion tracking
   const courseIds = useMemo(() => {
@@ -27,12 +27,6 @@ export default function ExploreScreen() {
   // Group courses by theme
   const groupedCourses = useMemo(() => {
     const grouped: Record<string, any[]> = {};
-    
-    console.log('🔍 Courses data:', courses.map(c => ({ 
-      id: c.id, 
-      title: c.title, 
-      disabled: c.disabled 
-    })));
     
     courses.forEach(course => {
       const themeName = course.theme?.name || 'Other';
@@ -96,23 +90,18 @@ export default function ExploreScreen() {
                 <Text style={styles.themeTitle}>{themeName}</Text>
                 <View style={styles.coursesContainer}>
                   {themeCourses.map((course) => (
-                    <TouchableOpacity
+                    <CollectionCard
                       key={course.id}
-                      style={styles.courseCard}
-                      onPress={() => handleCoursePress(course)}
+                      title={course.title}
+                      sessions={course.sessionCount ?? 0}
+                      color={course.theme?.name ? getThemeConfig(course.theme.name)?.colors : undefined}
                       disabled={course.disabled}
-                    >
-                      <CollectionCard
-                        title={course.title}
-                        sessions={course.sessionCount ?? 0}
-                        color={course.theme?.name ? getThemeConfig(course.theme.name)?.colors : undefined}
-                        disabled={course.disabled}
-                        fullWidth
-                        showCompletion={true}
-                        completedSessions={getCourseCompletion(course.id).completedSessions}
-                        totalSessions={getCourseCompletion(course.id).totalSessions}
-                      />
-                    </TouchableOpacity>
+                      fullWidth
+                      showCompletion={true}
+                      completedSessions={getCourseCompletion(course.id).completedSessions}
+                      totalSessions={getCourseCompletion(course.id).totalSessions}
+                      onPress={() => handleCoursePress(course)}
+                    />
                   ))}
                 </View>
               </View>
@@ -131,7 +120,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 17,
+    padding: 8.5,
     backgroundColor: '#000',
   },
   header: {

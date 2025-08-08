@@ -2,7 +2,7 @@ import { Background } from '@/components/ui/Background';
 import { SessionCard } from '@/components/ui/SessionCard';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { SessionCardSkeleton } from '@/components/ui/SkeletonCards';
-import { useCourses } from '@/src/hooks/useCourses';
+import { useData } from '@/src/contexts/DataContext';
 import { useSessionCompletion } from '@/src/hooks/useSessionCompletion';
 import { useSessionsByCourseTitle } from '@/src/hooks/useSessionsByCourseTitle';
 import { useIsFocused } from '@react-navigation/native';
@@ -17,7 +17,7 @@ export default function CollectionScreen() {
   const { courseId, title } = useLocalSearchParams<{ courseId: string; title: string }>();
   const isFocused = useIsFocused();
   
-  const { courses, loading: coursesLoading } = useCourses();
+  const { courses, coursesLoading } = useData();
   const { course: courseData, maintenance, basic, loading: sessionsLoading } = useSessionsByCourseTitle(title || '');
   
   // Get course data
@@ -33,7 +33,6 @@ export default function CollectionScreen() {
   // Get session IDs for completion tracking
   const allSessionIds = useMemo(() => {
     const ids = allSessions.map((session: any) => session.id);
-    console.log('🔍 Session IDs for completion tracking:', ids);
     return ids;
   }, [allSessions]);
 
@@ -41,9 +40,7 @@ export default function CollectionScreen() {
 
   // Refresh completion data when screen comes into focus
   useEffect(() => {
-    console.log('🔄 Collection screen focus effect triggered, isFocused:', isFocused);
     if (isFocused) {
-      console.log('🔄 Collection screen focused, refreshing completion data');
       refresh();
     }
   }, [isFocused, refresh]);
@@ -54,12 +51,7 @@ export default function CollectionScreen() {
   // Skeleton arrays for loading states
   const sessionSkeletons = Array(8).fill(null);
 
-  console.log('🔍 Collection page title parameter:', title);
-  console.log('🔍 Course data:', course);
-  console.log('🔍 Course title from data:', course?.title);
-
   const handlePress = (session: any) => {
-    console.log('🟡 Tapped session:', session);
     const encodedUrl = encodeURIComponent(session.audio_url);
     const params = {
       audioUrl: encodedUrl,
@@ -68,8 +60,6 @@ export default function CollectionScreen() {
       imageUrl: '',
       sessionId: session.id,
     };
-    console.log('🟢 Navigating to /play with params:', params);
-    console.log('🟢 Course title being passed as author:', course?.title || title);
     router.push({
       pathname: '/play',
       params,
@@ -130,8 +120,6 @@ export default function CollectionScreen() {
                   <View style={styles.sessionsContainer}>
                     {basicTrainingSessions.map((session: any) => {
                       const completion = getSessionCompletion(session.id);
-                      console.log(`🔍 Session ${session.title}:`, completion.status);
-                      console.log(`🔍 Session ${session.id} completion data:`, completion);
                       
                       return (
                         <SessionCard

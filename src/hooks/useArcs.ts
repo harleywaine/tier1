@@ -16,18 +16,14 @@ export function useArcs() {
   useEffect(() => {
     const fetchArcs = async () => {
       try {
-        console.log('🔍 Fetching arcs from database...');
         const { data, error } = await supabase
           .from('arcs')
           .select('*');
-
-        console.log('🔍 Arcs query result:', { data, error });
 
         if (error) {
           console.error('🔍 Arcs query error:', error);
           setError(error.message);
         } else {
-          console.log('🔍 Arcs fetched successfully:', data);
           setArcs(data || []);
         }
       } catch (err) {

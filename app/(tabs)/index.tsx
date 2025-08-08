@@ -4,11 +4,8 @@ import { GradientButton } from '@/components/ui/GradientButton';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { ArcCardSkeleton, SwitchCardSkeleton } from '@/components/ui/SkeletonCards';
 import { SwitchCard } from '@/components/ui/SwitchCard';
-import { useArcs } from '@/src/hooks/useArcs';
-import { useCourses } from '@/src/hooks/useCourses';
-import { useUserPlayHistory } from '@/src/hooks/useUserPlayHistory';
+import { useData } from '@/src/contexts/DataContext';
 import { useRouter } from 'expo-router';
-import { Lightning, Moon, Trophy } from 'phosphor-react-native';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, FlatList, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { supabase } from '../../lib/supabase';
@@ -21,9 +18,7 @@ const rem = (size: number) => size * baseFontSize;
 export default function HomeScreen() {
   const router = useRouter();
   const [firstName, setFirstName] = useState<string>('');
-  const { arcs, loading: arcsLoading } = useArcs();
-  const { courses, loading: coursesLoading } = useCourses();
-  const { lastPlayedSession, loading: historyLoading } = useUserPlayHistory();
+  const { arcs, courses, lastPlayedSession, arcsLoading, coursesLoading, historyLoading } = useData();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -46,14 +41,6 @@ export default function HomeScreen() {
   
   // Sort arcs according to the specified order
   const sortedArcs = arcOrder.map(name => arcs.find(arc => arc.name === name)).filter(Boolean);
-
-  console.log('🔍 Debug arcs:', {
-    arcsLoading,
-    arcsCount: arcs.length,
-    sortedArcsCount: sortedArcs.length,
-    arcs: arcs.map(a => a ? { name: a.name, title: a.title } : null),
-    sortedArcs: sortedArcs.map(a => a ? { name: a.name, title: a.title } : null)
-  });
 
   const renderArcContent = (arc: any) => {
     switch (arc.name) {
@@ -114,9 +101,9 @@ export default function HomeScreen() {
             description={arc.description}
           >
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 16, gap: 8 }}>
-              <SwitchCard icon={Lightning} title="" color={['#2a9d8f']} />
-              <SwitchCard icon={Moon} title="" color={['#6c757d']} />
-              <SwitchCard icon={Trophy} title="" color={['#e9c46a']} />
+              <SwitchCard title="ON" color={['#2a9d8f']} />
+              <SwitchCard title="OFF" color={['#6c757d']} />
+              <SwitchCard title="CONTROL" color={['#e9c46a']} />
             </View>
           </ArcCard>
         );
@@ -138,21 +125,18 @@ export default function HomeScreen() {
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
                 <View style={styles.horizontalCard}>
-                  <TouchableOpacity
+                  <CollectionCard
+                    title={item.title}
+                    sessions={item.sessionCount ?? 0}
+                    fullWidth
+                    hideIcon
                     onPress={() => {
                       router.push({
                         pathname: '/collection',
                         params: { courseId: item.id, title: item.title },
                       });
                     }}
-                  >
-                    <CollectionCard
-                      title={item.title}
-                      sessions={item.sessionCount ?? 0}
-                      fullWidth
-                      hideIcon
-                    />
-                  </TouchableOpacity>
+                  />
                 </View>
               )}
               ListFooterComponent={() => (
@@ -206,7 +190,7 @@ export default function HomeScreen() {
         <View style={[styles.header, { paddingTop: rem(2.5) }]}>
           <View>
             <Text style={styles.title}>{`You're back${firstName ? ', ' + firstName : ''}`}</Text>
-            <Text style={styles.subtitle}>Let's train, win your day</Text>
+            <Text style={styles.subtitle}>Time to lead your mind. Lets train.</Text>
           </View>
         </View>
 
@@ -257,7 +241,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 17,
+    padding: 8.5,
     backgroundColor: '#000',
   },
   header: {

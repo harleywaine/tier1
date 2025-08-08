@@ -1,4 +1,4 @@
-import { CheckCircle, Heart } from 'phosphor-react-native';
+import { CheckCircle, Heart, Play } from 'phosphor-react-native';
 import React from 'react';
 import {
     StyleSheet,
@@ -29,7 +29,7 @@ interface SessionCardProps {
   onHeartPress?: () => void;
 }
 
-export const SessionCard = ({
+export const SessionCard: React.FC<SessionCardProps> = ({
   title,
   subtitle,
   buttonLabel,
@@ -47,8 +47,19 @@ export const SessionCard = ({
   showHeartIcon = false,
   isFavorited = false,
   onHeartPress,
-}: SessionCardProps) => {
-  console.log(`🎯 SessionCard "${title}" completionStatus:`, completionStatus);
+}) => {
+  const renderCompletionIcon = () => {
+    if (hideCompletionIcon) return null;
+    
+    switch (completionStatus) {
+      case 'started':
+        return <CheckCircle size={20} color="rgba(255, 255, 255, 0.7)" weight="fill" />;
+      case 'completed':
+        return <CheckCircle size={20} color="#4ade80" weight="fill" />;
+      default:
+        return <Play size={20} color="#fff" weight="fill" />;
+    }
+  };
   
   return (
     <TouchableOpacity
