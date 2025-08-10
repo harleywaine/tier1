@@ -1,7 +1,9 @@
 import { Background } from '@/components/ui/Background';
 import { GradientButton } from '@/components/ui/GradientButton';
 import { SecondaryButton } from '@/components/ui/SecondaryButton';
+import { AccountSectionCard } from '@/components/ui/AccountSectionCard';
 import { useFeedback } from '@/src/hooks/useFeedback';
+import { Colors } from '@/constants/Colors';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, Dimensions, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -159,25 +161,14 @@ export default function AccountScreen() {
             </View>
           </View>
           
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Profile Information</Text>
-              {!isEditing ? (
-                <TouchableOpacity onPress={() => setIsEditing(true)}>
-                  <Text style={styles.editButton}>Edit</Text>
-                </TouchableOpacity>
-              ) : (
-                <View style={styles.editActions}>
-                  <TouchableOpacity onPress={() => setIsEditing(false)} style={styles.cancelButton}>
-                    <Text style={styles.cancelButtonText}>Cancel</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={handleSaveProfile} style={styles.saveButton} disabled={profileLoading}>
-                    <Text style={styles.saveButtonText}>{profileLoading ? 'Saving...' : 'Save'}</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-            
+          <AccountSectionCard
+            title="Profile Information"
+            onEditPress={() => setIsEditing(true)}
+            isEditing={isEditing}
+            onSavePress={handleSaveProfile}
+            onCancelPress={() => setIsEditing(false)}
+            saveLoading={profileLoading}
+          >
             <View style={styles.infoContainer}>
               <Text style={styles.label}>Email</Text>
               <Text style={styles.value}>{email ?? 'Loading...'}</Text>
@@ -222,7 +213,7 @@ export default function AccountScreen() {
                 {loading ? 'Sending...' : 'Reset Password'}
               </Text>
             </TouchableOpacity>
-          </View>
+          </AccountSectionCard>
 
           <TouchableOpacity 
             style={styles.signOutButton} 
@@ -238,8 +229,7 @@ export default function AccountScreen() {
 
 
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Feedback</Text>
+          <AccountSectionCard title="Feedback">
             <Text style={styles.feedbackDescription}>
               Help us improve by sharing your thoughts, suggestions, or reporting issues.
             </Text>
@@ -279,7 +269,7 @@ export default function AccountScreen() {
                 disabled={feedbackLoading || feedbackMessage.trim().length < 5}
               />
             </View>
-                      </View>
+          </AccountSectionCard>
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
@@ -290,7 +280,7 @@ export default function AccountScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#070708',
+    backgroundColor: Colors.background.primary,
   },
   keyboardAvoidingView: {
     flex: 1,
@@ -298,7 +288,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 8.5,
-    backgroundColor: '#070708',
+    backgroundColor: Colors.background.primary,
   },
   content: {
     flex: 1,
@@ -313,11 +303,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontFamily: 'SFProDisplay-Regular',
-    color: '#fff',
+    color: Colors.text.primary,
   },
   subtitle: {
     fontSize: 16,
-    color: '#aaa',
+    color: Colors.text.secondary,
     marginTop: 2,
     fontFamily: 'SFProDisplay-Light',
   },
@@ -325,76 +315,30 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    color: '#aaa',
+    color: Colors.text.secondary,
     fontSize: 16,
     marginBottom: 2,
     fontFamily: 'SFProDisplay-Light',
   },
   value: {
-    color: '#fff',
+    color: Colors.text.primary,
     fontSize: 18,
     fontFamily: 'SFProDisplay-Light',
   },
-  section: {
-    backgroundColor: '#1a1a1a',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#333',
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontFamily: 'SFProDisplay-Regular',
-    color: '#fff',
-  },
-  editButton: {
-    color: '#007bff',
-    fontSize: 16,
-    fontFamily: 'SFProDisplay-Regular',
-  },
-  editActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  cancelButton: {
-    marginRight: 10,
-  },
-  cancelButtonText: {
-    color: '#007bff',
-    fontSize: 16,
-    fontFamily: 'SFProDisplay-Regular',
-  },
-  saveButton: {
-    backgroundColor: '#007bff',
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontFamily: 'SFProDisplay-Regular',
-  },
+
   fieldInput: {
-    backgroundColor: '#2C2D30',
+    backgroundColor: Colors.input.background,
     borderRadius: 8,
     padding: 16,
     fontSize: 16,
-    color: '#fff',
+    color: Colors.text.primary,
     borderWidth: 1,
-    borderColor: '#3C3D40',
+    borderColor: Colors.input.border,
   },
   fieldInputDisabled: {
-    backgroundColor: '#1C1F29',
-    color: '#666',
-    borderColor: '#2A2D3D',
+    backgroundColor: Colors.input.disabled,
+    color: Colors.input.disabledText,
+    borderColor: Colors.border.accent,
   },
   buttonRow: {
     flexDirection: 'row',
@@ -408,53 +352,44 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
   },
-  editButton: {
-    backgroundColor: '#3C3D40',
-  },
-  saveButton: {
-    backgroundColor: '#4A6B99',
-  },
-  cancelButton: {
-    backgroundColor: '#6B4A4A',
-  },
   settingItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
+    borderBottomColor: Colors.border.secondary,
   },
   settingLabel: {
-    color: '#fff',
+    color: Colors.text.primary,
     fontSize: 16,
     fontFamily: 'SFProDisplay-Regular',
   },
   settingValue: {
-    color: '#aaa',
+    color: Colors.text.secondary,
     fontSize: 16,
     fontFamily: 'SFProDisplay-Light',
   },
   signOutButton: {
-    backgroundColor: '#2a2a2a',
+    backgroundColor: Colors.border.accent,
     borderRadius: 10,
     paddingVertical: 16,
     paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: Colors.border.secondary,
     marginBottom: 20,
     width: '100%',
   },
   signOutButtonText: {
-    color: '#fff',
+    color: Colors.text.primary,
     fontSize: 16,
     fontFamily: 'SFProDisplay-Regular',
     fontWeight: '600',
   },
   feedbackDescription: {
-    color: '#aaa',
+    color: Colors.text.secondary,
     fontSize: 14,
     marginTop: 8,
     marginBottom: 20,
@@ -462,14 +397,14 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   feedbackInput: {
-    backgroundColor: '#2a2a2a',
+    backgroundColor: Colors.border.accent,
     borderRadius: 8,
     padding: 12,
-    color: '#fff',
+    color: Colors.text.primary,
     fontSize: 16,
     fontFamily: 'SFProDisplay-Regular',
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: Colors.border.secondary,
     minHeight: 100,
     marginBottom: 15,
   },
@@ -479,12 +414,12 @@ const styles = StyleSheet.create({
     gap: 15,
   },
   characterCount: {
-    color: '#666',
+    color: Colors.text.tertiary,
     fontSize: 14,
     fontFamily: 'SFProDisplay-Light',
   },
   successMessage: {
-    backgroundColor: '#1a3a1a',
+    backgroundColor: Colors.status.success + '20', // 20% opacity
     borderRadius: 8,
     padding: 12,
     marginBottom: 15,
@@ -492,10 +427,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#22c55e',
+    borderColor: Colors.status.success,
   },
   successText: {
-    color: '#22c55e',
+    color: Colors.status.success,
     fontSize: 14,
     fontFamily: 'SFProDisplay-Regular',
     flex: 1,
@@ -505,7 +440,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: '#22c55e',
+    backgroundColor: Colors.status.success,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -516,7 +451,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   errorText: {
-    color: '#ef4444',
+    color: Colors.status.error,
     fontSize: 14,
     fontFamily: 'SFProDisplay-Regular',
     marginBottom: 15,
@@ -525,14 +460,14 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: Colors.overlay.light,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: Colors.border.secondary,
     alignItems: 'center',
   },
   resetPasswordText: {
-    color: '#007bff',
+    color: Colors.text.accent,
     fontSize: 16,
     fontFamily: 'SFProDisplay-Regular',
   },

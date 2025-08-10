@@ -98,10 +98,18 @@ const styles = StyleSheet.create({
   switchCard: {
     backgroundColor: 'rgba(40, 40, 40, 0.65)',
     borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderWidth: 2,
+    borderColor: '#3C3D40',
     height: 60,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
 }); 

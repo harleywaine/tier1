@@ -1,3 +1,4 @@
+import { Colors } from '@/constants/Colors';
 import React from 'react';
 import { StyleSheet, Text, View, ViewStyle } from 'react-native';
 
@@ -29,8 +30,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 0,
-    borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderWidth: 2,
+    borderColor: Colors.border.primary,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   iconCircle: {
     width: 60,
@@ -38,6 +47,9 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: Colors.border.primary,
+    backgroundColor: 'rgba(60, 60, 60, 0.3)',
   },
   switchTitle: {
     color: '#fff',
