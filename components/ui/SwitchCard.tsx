@@ -47,9 +47,6 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: Colors.border.primary,
-    backgroundColor: 'rgba(60, 60, 60, 0.3)',
   },
   switchTitle: {
     color: '#fff',
@@ -60,9 +57,10 @@ const styles = StyleSheet.create({
   switchText: {
     color: '#fff',
     fontWeight: '600',
-    fontSize: 11,
+    fontSize: 10,
     textAlign: 'center',
     fontFamily: 'SFProDisplay-Regular',
-    paddingHorizontal: 2,
+    paddingHorizontal: 1,
+    flexShrink: 1,
   },
 }); 

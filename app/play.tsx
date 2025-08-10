@@ -1,13 +1,12 @@
 import { Background } from '@/components/ui/Background';
 import { useAudioPlayer } from '@/src/hooks/useAudioPlayer';
 import { useFavorites } from '@/src/hooks/useFavorites';
-import { useSessionsByCourseTitle } from '@/src/hooks/useSessionsByCourseTitle';
 import { useUserPlayHistory } from '@/src/hooks/useUserPlayHistory';
 import Slider from '@react-native-community/slider';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import LottieView from 'lottie-react-native';
 import { ArrowLeft, Heart, Pause, Play, SkipBack, SkipForward } from 'phosphor-react-native';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function PlayScreen() {
@@ -21,71 +20,12 @@ export default function PlayScreen() {
     sessionId?: string;
   }>();
   
-  // Use state to manage current session data instead of relying on params
-  const [currentSession, setCurrentSession] = useState({
-    audioUrl: decodeURIComponent(params.audioUrl || ''),
-    title: params.title || 'Session',
-    author: params.author || 'Glenn Harrold',
-    sessionId: params.sessionId || '',
-  });
+  const audioUrl = decodeURIComponent(params.audioUrl);
+  const title = params.title || 'Session';
+  const author = params.author || 'Glenn Harrold';
+  const sessionId = params.sessionId;
 
-  // Get all sessions for the current course to enable navigation
-  const { maintenance, basic } = useSessionsByCourseTitle(currentSession.author);
-  
-  // Combine and sort all sessions by position
-  const allSessions = useMemo(() => {
-    const basicSessions = basic.filter((s: any) => s.position && s.position <= 10)
-      .sort((a: any, b: any) => (a.position || 0) - (b.position || 0));
-    const maintenanceSessions = maintenance.filter((s: any) => s.position && s.position > 10)
-      .sort((a: any, b: any) => (a.position || 0) - (b.position || 0));
-    return [...basicSessions, ...maintenanceSessions];
-  }, [basic, maintenance]);
-
-  // Find current session index
-  const currentSessionIndex = useMemo(() => {
-    return allSessions.findIndex((session: any) => session.id === currentSession.sessionId);
-  }, [allSessions, currentSession.sessionId]);
-
-  // Get next and previous sessions
-  const nextSession = useMemo(() => {
-    if (currentSessionIndex >= 0 && currentSessionIndex < allSessions.length - 1) {
-      return allSessions[currentSessionIndex + 1];
-    }
-    return null;
-  }, [allSessions, currentSessionIndex]);
-
-  const previousSession = useMemo(() => {
-    if (currentSessionIndex > 0) {
-      return allSessions[currentSessionIndex - 1];
-    }
-    return null;
-  }, [allSessions, currentSessionIndex]);
-
-  // Navigation functions - update state directly without navigation
-  const navigateToSession = (session: any) => {
-    if (!session) return;
-    
-    setCurrentSession({
-      audioUrl: session.audio_url,
-      title: session.title,
-      author: currentSession.author,
-      sessionId: session.id,
-    });
-  };
-
-  const handleNextSession = () => {
-    if (nextSession) {
-      navigateToSession(nextSession);
-    }
-  };
-
-  const handlePreviousSession = () => {
-    if (previousSession) {
-      navigateToSession(previousSession);
-    }
-  };
-
-  const { status, isLoading, error, play, pause, seekTo } = useAudioPlayer(currentSession.audioUrl);
+  const { status, isLoading, error, play, pause, seekTo } = useAudioPlayer(audioUrl);
 
   const isPlaying = (status as any)?.isPlaying ?? false;
   const duration = (status as any)?.durationMillis ?? 0;
@@ -97,23 +37,30 @@ export default function PlayScreen() {
 
   // Record session start when audio begins playing
   React.useEffect(() => {
-    if (currentSession.sessionId && isPlaying && !hasRecordedStart) {
-      recordSessionStart(currentSession.sessionId);
+    if (sessionId && isPlaying && !hasRecordedStart) {
+      recordSessionStart(sessionId);
+      // Also update progress immediately to ensure status is set
+      if (duration > 0 && position > 0) {
+        const progressPercentage = Math.round((position / duration) * 100);
+        updateSessionProgress(sessionId, progressPercentage);
+      }
       setHasRecordedStart(true);
     }
-  }, [currentSession.sessionId, isPlaying, hasRecordedStart, recordSessionStart]);
+  }, [sessionId, isPlaying, hasRecordedStart, recordSessionStart, duration, position, updateSessionProgress]);
 
-  // Update progress when reaching 95% completion
+  // Update progress more frequently
   React.useEffect(() => {
-    if (currentSession.sessionId && duration > 0 && position > 0) {
+    if (sessionId && duration > 0 && position > 0) {
       const progressPercentage = Math.round((position / duration) * 100);
       
-      // Only update when reaching 95% completion
-      if (progressPercentage >= 95) {
-        updateSessionProgress(currentSession.sessionId, progressPercentage);
+      // Update progress every 5 seconds or when reaching 100%
+      const shouldUpdate = progressPercentage % 5 === 0 || progressPercentage >= 100;
+      
+      if (shouldUpdate) {
+        updateSessionProgress(sessionId, progressPercentage);
       }
     }
-  }, [currentSession.sessionId, duration, position, updateSessionProgress]);
+  }, [sessionId, duration, position, updateSessionProgress]);
 
   const onSeekStart = () => setSeeking(true);
   const onSeekComplete = (value: number) => {
@@ -138,15 +85,15 @@ export default function PlayScreen() {
             <ArrowLeft color="#e0f6ff" size={26} weight="light" />
           </TouchableOpacity>
 
-          {currentSession.sessionId && (
+          {sessionId && (
             <TouchableOpacity
               style={styles.favoriteButton}
-              onPress={() => toggleFavorite(currentSession.sessionId)}
+              onPress={() => toggleFavorite(sessionId)}
             >
               <Heart
                 size={26}
                 color="#e0f6ff"
-                weight={isFavorited(currentSession.sessionId) ? "fill" : "light"}
+                weight={isFavorited(sessionId) ? "fill" : "light"}
               />
             </TouchableOpacity>
           )}
@@ -161,8 +108,8 @@ export default function PlayScreen() {
               />
             </View>
             <View style={styles.infoContainer}>
-              <Text style={styles.title}>{currentSession.title}</Text>
-              <Text style={styles.author}>{currentSession.author}</Text>
+              <Text style={styles.title}>{title}</Text>
+              <Text style={styles.author}>{author}</Text>
             </View>
           </View>
 
@@ -186,22 +133,14 @@ export default function PlayScreen() {
           </View>
 
           <View style={styles.controls}>
-            <TouchableOpacity 
-              onPress={handlePreviousSession} 
-              style={[styles.skipButton, !previousSession && styles.disabledButton]}
-              disabled={!previousSession}
-            >
-              <SkipBack color={previousSession ? "#ffffff" : "#666666"} size={32} weight="light" style={{ opacity: previousSession ? 0.6 : 0.3 }} />
+            <TouchableOpacity onPress={() => seekTo(Math.max(0, displayPosition - 10000))} style={styles.skipButton}>
+              <SkipBack color="#ffffff" size={32} weight="light" style={{ opacity: 0.6 }} />
             </TouchableOpacity>
             <TouchableOpacity onPress={isPlaying ? pause : play} style={[styles.playPauseButton, { backgroundColor: '#457b9d' }]}>
               {isPlaying ? <Pause color="#fff" size={40} weight="fill" /> : <Play color="#fff" size={40} weight="fill" />}
             </TouchableOpacity>
-            <TouchableOpacity 
-              onPress={handleNextSession} 
-              style={[styles.skipButton, !nextSession && styles.disabledButton]}
-              disabled={!nextSession}
-            >
-              <SkipForward color={nextSession ? "#ffffff" : "#666666"} size={32} weight="light" style={{ opacity: nextSession ? 0.6 : 0.3 }} />
+            <TouchableOpacity onPress={() => seekTo(Math.min(duration, displayPosition + 10000))} style={styles.skipButton}>
+              <SkipForward color="#ffffff" size={32} weight="light" style={{ opacity: 0.6 }} />
             </TouchableOpacity>
           </View>
 
@@ -214,8 +153,8 @@ export default function PlayScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#070708' },
-  container: { flex: 1, padding: 17, backgroundColor: '#070708', alignItems: 'center' },
+  safeArea: { flex: 1, backgroundColor: 'transparent' },
+  container: { flex: 1, padding: 17, backgroundColor: 'transparent', alignItems: 'center' },
   lottieInfoWrapper: { marginTop: 100, alignItems: 'center' },
   imageCard: {
     width: '100%',
@@ -271,8 +210,4 @@ const styles = StyleSheet.create({
   },
   loadingText: { color: '#fff', marginTop: 20 },
   errorText: { color: 'red', marginTop: 12 },
-  disabledButton: {
-    opacity: 0.3,
-    pointerEvents: 'none',
-  },
 });

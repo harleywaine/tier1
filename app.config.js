@@ -1,0 +1,63 @@
+import 'dotenv/config';
+
+export default {
+  expo: {
+    name: "tier1",
+    slug: "tier1",
+    version: "1.0.0",
+    sdkVersion: "53.0.0",
+    orientation: "portrait",
+    icon: "./assets/images/icon.png",
+    scheme: "tier1",
+    userInterfaceStyle: "automatic",
+    newArchEnabled: true,
+    ios: {
+      supportsTablet: true,
+      bundleIdentifier: "com.tier1dev.tier1",
+      infoPlist: {
+        ITSAppUsesNonExemptEncryption: false
+      }
+    },
+    android: {
+      adaptiveIcon: {
+        foregroundImage: "./assets/images/adaptive-icon.png",
+        backgroundColor: "#ffffff"
+      },
+      edgeToEdgeEnabled: true,
+      permissions: [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
+    },
+    web: {
+      bundler: "metro",
+      output: "static",
+      favicon: "./assets/images/favicon.png"
+    },
+    plugins: [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          image: "./assets/images/splash-icon.png",
+          imageWidth: 200,
+          resizeMode: "contain",
+          backgroundColor: "#ffffff"
+        }
+      ],
+      "expo-audio"
+    ],
+    experiments: {
+      typedRoutes: true
+    },
+    extra: {
+      router: {},
+      eas: {
+        projectId: "c147cb22-cdb9-4822-9d85-1e5b1b365fca"
+      },
+      // Use environment variables for development, fallback to production values
+      supabaseUrl: process.env.SUPABASE_URL || "https://xwuojtunlfiejqedflsk.supabase.co",
+      supabaseAnonKey: process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh3dW9qdHVubGZpZWpxZWRmbHNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg5NTY2NDgsImV4cCI6MjA2NDUzMjY0OH0.IsQyiGEaTfQepuesCDlAtChCDQLdPjNaIZQrCV_r270"
+    }
+  }
+};

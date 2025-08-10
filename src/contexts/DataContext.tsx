@@ -80,6 +80,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       setCoursesLoading(true);
       setCoursesError(null);
 
+      // Optimized query: Get courses with session counts in a single query
       const { data, error } = await supabase
         .from('courses')
         .select(`
@@ -91,33 +92,28 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             id,
             name,
             display_name
-          )
+          ),
+          basic_training_sessions!basic_training_sessions_course_id_fkey(count),
+          maintenance_sessions!maintenance_sessions_course_id_fkey(count)
         `)
         .order('title');
 
       if (error) throw error;
 
-      const coursesWithSessionCount = await Promise.all(
-        data.map(async (course) => {
-          // Get session count for basic training
-          const { count: basicCount } = await supabase
-            .from('basic_training_sessions')
-            .select('*', { count: 'exact', head: true })
-            .eq('course_id', course.id);
-
-          // Get session count for maintenance
-          const { count: maintenanceCount } = await supabase
-            .from('maintenance_sessions')
-            .select('*', { count: 'exact', head: true })
-            .eq('course_id', course.id);
-
-          return {
-            ...course,
-            sessionCount: (basicCount || 0) + (maintenanceCount || 0),
-            theme: course.collection_themes,
-          };
-        })
-      );
+      // Transform the data to match the expected format
+      const coursesWithSessionCount = data.map((course) => {
+        const basicCount = course.basic_training_sessions?.[0]?.count || 0;
+        const maintenanceCount = course.maintenance_sessions?.[0]?.count || 0;
+        
+        return {
+          id: course.id,
+          title: course.title,
+          description: course.description,
+          disabled: course.disabled,
+          sessionCount: basicCount + maintenanceCount,
+          theme: course.collection_themes,
+        };
+      });
 
       setCourses(coursesWithSessionCount);
     } catch (err) {
@@ -156,10 +152,34 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      // Get the most recent play history entry
+      // Optimized query: Get last played session with session details and course info in one query
       const { data: historyData, error: historyError } = await supabase
         .from('user_play_history')
-        .select('*')
+        .select(`
+          *,
+          maintenance_sessions!maintenance_sessions_id_fkey(
+            id,
+            title,
+            audio_url,
+            position,
+            course_id,
+            courses!maintenance_sessions_course_id_fkey(
+              id,
+              title
+            )
+          ),
+          basic_training_sessions!basic_training_sessions_id_fkey(
+            id,
+            title,
+            audio_url,
+            position,
+            course_id,
+            courses!basic_training_sessions_course_id_fkey(
+              id,
+              title
+            )
+          )
+        `)
         .eq('user_id', user.id)
         .order('updated_at', { ascending: false })
         .limit(1)
@@ -170,52 +190,14 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      // Try to get session details from maintenance_sessions first
-      let { data: sessionData, error: sessionError } = await supabase
-        .from('maintenance_sessions')
-        .select(`
-          id,
-          title,
-          audio_url,
-          position,
-          course_id
-        `)
-        .eq('id', historyData.session_id)
-        .single();
+      // Determine which session type we have and extract the data
+      const maintenanceSession = historyData.maintenance_sessions?.[0];
+      const basicSession = historyData.basic_training_sessions?.[0];
+      
+      const sessionData = maintenanceSession || basicSession;
+      const courseData = maintenanceSession?.courses || basicSession?.courses;
 
-      // If not found in maintenance_sessions, try basic_training_sessions
-      if (sessionError && sessionError.code === 'PGRST116') {
-        const { data: basicSessionData, error: basicSessionError } = await supabase
-          .from('basic_training_sessions')
-          .select(`
-            id,
-            title,
-            audio_url,
-            position,
-            course_id
-          `)
-          .eq('id', historyData.session_id)
-          .single();
-        
-        sessionData = basicSessionData;
-        sessionError = basicSessionError;
-      }
-
-      // If session found, get the course title
-      let courseTitle = null;
-      let courseId: string | undefined;
-      if (sessionData && sessionData.course_id) {
-        const { data: courseData } = await supabase
-          .from('courses')
-          .select('title, id')
-          .eq('id', sessionData.course_id)
-          .single();
-        
-        courseTitle = courseData?.title;
-        courseId = courseData?.id;
-      }
-
-      if (sessionError || !sessionData) {
+      if (!sessionData) {
         // Session no longer exists, clean up the history entry
         await supabase
           .from('user_play_history')
@@ -233,8 +215,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         type: sessionData.position <= 10 ? 'basic' : 'maintenance',
         status: historyData.status,
         progress_percentage: historyData.progress_percentage,
-        course_title: courseTitle,
-        course_id: courseId,
+        course_title: courseData?.title,
+        course_id: courseData?.id,
       };
       
       setLastPlayedSession(lastSession);
